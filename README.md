@@ -1,6 +1,6 @@
-# Bolang - Golang
+# Boolang - Golang
 
-Bolang is a basic CRUD RESTful API built with Golang and Postgres.
+Boolang is a basic CRUD RESTful API built with Golang and Postgres.
 
 ## Installation
 
