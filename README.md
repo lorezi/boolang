@@ -4,9 +4,11 @@ Boolang is a basic CRUD RESTful API built with Golang and Postgres.
 
 ## Installation
 
-pq (https://github.com/lib/pq)
-mux (https://github.com/gorilla/mux)
-gotenv (https://github.com/subosito/gotenv)
+[pq] (https://github.com/lib/pq)
+
+[mux] (https://github.com/gorilla/mux)
+
+[gotenv] (https://github.com/subosito/gotenv)
 
 ```bash
 go get github.com/lib/pq
