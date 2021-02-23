@@ -5,7 +5,8 @@ import (
 	"log"
 	"os"
 
-	"github.com/lib/pq"
+	// imported strictly for setup
+	_ "github.com/lib/pq"
 	"github.com/subosito/gotenv"
 )
 
@@ -15,10 +16,7 @@ var db *sql.DB
 func Init() *sql.DB {
 	gotenv.Load()
 
-	pgURL, err := pq.ParseURL(os.Getenv("ELEPHANTSQL_URL"))
-	LogFatal(err)
-
-	db, err = sql.Open("postgres", pgURL)
+	db, err := sql.Open("postgres", os.Getenv("ELEPHANTSQL_URL"))
 
 	LogFatal(err)
 

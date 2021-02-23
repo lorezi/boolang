@@ -14,10 +14,10 @@ import (
 
 // Book model
 type Book struct {
-	ID     int
-	Title  string
-	Author string
-	Year   string
+	ID     int    `json:"id"`
+	Title  string `json:"title"`
+	Author string `json:"author"`
+	Year   string `json:"year"`
 }
 
 var books []Book
