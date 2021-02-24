@@ -64,7 +64,7 @@ func GetBooks(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 func GetBook(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	var book Book
 
-	rows := db.QueryRow("select * from books where id=$1", ps.ByName("id"))
+	rows := db.QueryRow("Select * From books Where id=$1", ps.ByName("id"))
 	err := rows.Scan(&book.ID, &book.Title, &book.Author, &book.Year)
 	h.LogFatal(err)
 
@@ -82,7 +82,7 @@ func AddBook(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	// map json request to book variable
 	json.NewDecoder(r.Body).Decode(&book)
 
-	err := db.QueryRow("insert into books (title, author, year) values($1, $2, $3) RETURNING id;", book.Title, book.Author, book.Year).Scan(&bookID)
+	err := db.QueryRow("Insert into books (title, author, year) values($1, $2, $3) RETURNING id;", book.Title, book.Author, book.Year).Scan(&bookID)
 
 	h.LogFatal(err)
 
