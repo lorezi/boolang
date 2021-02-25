@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"log"
+	"net/http"
 	"os"
 	"time"
 
@@ -46,6 +47,14 @@ func LogFatal(err error) {
 
 	}
 
+}
+
+// Error404 function
+func Error404(err error, w http.ResponseWriter) {
+	if err != nil {
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
 }
 
 // MongoConn is connection setting

@@ -71,23 +71,38 @@ func (bc BookController) GetBooks(w http.ResponseWriter, r *http.Request, ps htt
 
 // GetBook is
 func (bc BookController) GetBook(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	w.Header().Set("Content-Type", "application/json")
+
 	book := models.Book{}
 
-	collection := m.Database("boolang").Collection("books")
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
 	id, err := primitive.ObjectIDFromHex(ps.ByName("id"))
-	inits.LogFatal(err)
+	if err != nil {
+		r := models.Result{
+			Status:  "fail",
+			Message: "Page not found",
+		}
+		w.WriteHeader(http.StatusNotFound)
+		json.NewEncoder(w).Encode(r)
+		return
+	}
+
+	collection := m.Database("boolang").Collection("books")
 
 	filter := bson.D{bson.E{
 		Key:   "_id",
 		Value: id,
 	}}
-	err = collection.FindOne(ctx, filter).Decode(&book)
-	inits.LogFatal(err)
+	err = collection.FindOne(context.Background(), filter).Decode(&book)
+	if err != nil {
+		r := models.Result{
+			Status:  "fail",
+			Message: "Page not found",
+		}
+		w.WriteHeader(http.StatusNotFound)
+		json.NewEncoder(w).Encode(r)
+		return
+	}
 
-	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
 	json.NewEncoder(w).Encode(book)
 
@@ -104,26 +119,20 @@ func (bc BookController) AddBook(w http.ResponseWriter, r *http.Request, ps http
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	res, err := collection.InsertOne(ctx,
-		bson.D{
-			bson.E{
-				Key:   "title",
-				Value: book.Title,
-			},
-			bson.E{
-				Key:   "author",
-				Value: book.Author,
-			},
-			bson.E{
-				Key:   "year",
-				Value: book.Year,
-			},
-		})
+	res, err := collection.InsertOne(ctx, book)
+	if err != nil {
+		r := models.Result{
+			Status:  "fail",
+			Message: "Server error 😰😰😰",
+		}
+		w.WriteHeader(500)
+		json.NewEncoder(w).Encode(r)
+		return
+	}
 	id := res.InsertedID
-	inits.LogFatal(err)
+
 	// converts primitive objectID type to string
 	book.ID = id.(primitive.ObjectID).Hex()
-	// fmt.Printf("Created with the id: %T", book.ID)
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
@@ -134,12 +143,22 @@ func (bc BookController) AddBook(w http.ResponseWriter, r *http.Request, ps http
 // UpdateBook is
 func (bc BookController) UpdateBook(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	book := models.Book{}
-	bookID := 0
 
-	id, _ := strconv.Atoi(ps.ByName("id"))
+	id, err := primitive.ObjectIDFromHex(ps.ByName("id"))
+	inits.LogFatal(err)
+
+	filter := bson.D{
+		bson.E{
+			Key:   "_id",
+			Value: id,
+		},
+	}
+
 	json.NewDecoder(r.Body).Decode(&book)
 
-	err := db.QueryRow("update books set title=$1, author=$2, year=$3 where id=$4 RETURNING id", &book.Title, &book.Author, &book.Year, id).Scan(&bookID)
+	collection := m.Database("boolang").Collection("books")
+
+	err = collection.FindOneAndUpdate(context.TODO(), filter, book).Decode(&book)
 
 	inits.LogFatal(err)
 
