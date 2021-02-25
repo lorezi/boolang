@@ -48,10 +48,10 @@ func (bc BookController) GetBooks(w http.ResponseWriter, r *http.Request, ps htt
 	book := models.Book{}
 	books := []models.Book{}
 
-	// rows, err := db.Query("SELECT * FROM books")
 	collection := m.Database("boolang").Collection("books")
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
+
 	filter := bson.D{{}}
 	res, err := collection.Find(ctx, filter)
 	inits.LogFatal(err)
@@ -73,8 +73,18 @@ func (bc BookController) GetBooks(w http.ResponseWriter, r *http.Request, ps htt
 func (bc BookController) GetBook(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 	book := models.Book{}
 
-	rows := db.QueryRow("Select * From books Where id=$1", ps.ByName("id"))
-	err := rows.Scan(&book.ID, &book.Title, &book.Author, &book.Year)
+	collection := m.Database("boolang").Collection("books")
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	id, err := primitive.ObjectIDFromHex(ps.ByName("id"))
+	inits.LogFatal(err)
+
+	filter := bson.D{bson.E{
+		Key:   "_id",
+		Value: id,
+	}}
+	err = collection.FindOne(ctx, filter).Decode(&book)
 	inits.LogFatal(err)
 
 	w.Header().Set("Content-Type", "application/json")
