@@ -11,6 +11,7 @@ import (
 
 	"github.com/julienschmidt/httprouter"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 
 	"github.com/asekhamhe/boolang/inits"
@@ -47,15 +48,17 @@ func (bc BookController) GetBooks(w http.ResponseWriter, r *http.Request, ps htt
 	book := models.Book{}
 	books := []models.Book{}
 
-	rows, err := db.Query("SELECT * FROM books")
-
+	// rows, err := db.Query("SELECT * FROM books")
+	collection := m.Database("boolang").Collection("books")
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	filter := bson.D{{}}
+	res, err := collection.Find(ctx, filter)
 	inits.LogFatal(err)
 
-	defer rows.Close()
+	for res.Next(ctx) {
 
-	for rows.Next() {
-
-		err := rows.Scan(&book.ID, &book.Title, &book.Author, &book.Year)
+		err := res.Decode(&book)
 		inits.LogFatal(err)
 
 		books = append(books, book)
@@ -90,10 +93,27 @@ func (bc BookController) AddBook(w http.ResponseWriter, r *http.Request, ps http
 	collection := m.Database("boolang").Collection("books")
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	res, err := collection.InsertOne(ctx, bson.D{{"title", book.Title}, {"author", book.Author}, {"year", book.Year}})
+
+	res, err := collection.InsertOne(ctx,
+		bson.D{
+			bson.E{
+				Key:   "title",
+				Value: book.Title,
+			},
+			bson.E{
+				Key:   "author",
+				Value: book.Author,
+			},
+			bson.E{
+				Key:   "year",
+				Value: book.Year,
+			},
+		})
 	id := res.InsertedID
 	inits.LogFatal(err)
-	fmt.Printf("Created with the id: %s", id)
+	// converts primitive objectID type to string
+	book.ID = id.(primitive.ObjectID).Hex()
+	// fmt.Printf("Created with the id: %T", book.ID)
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)

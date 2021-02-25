@@ -60,3 +60,16 @@ func (conn *DB) MongoConn() *mongo.Client {
 
 	return client
 }
+
+/*
+COME ANOTHER FOR THIS BATTLE 😀😀😀
+*/
+// Collection for books
+// func (conn *DB) Collection() (*mongo.Collection, context.Context) {
+// 	m := conn.MongoConn()
+// 	collection := m.Database("boolang").Collection("books")
+// 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+// 	defer cancel()
+
+// 	return collection, ctx
+// }
