@@ -1,56 +1,62 @@
-package book
+package controllers
 
 import (
+	"context"
 	"database/sql"
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/julienschmidt/httprouter"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
 
-	h "github.com/asekhamhe/boolang/inits"
+	"github.com/asekhamhe/boolang/inits"
+	"github.com/asekhamhe/boolang/models"
 )
 
-// Book model
-type Book struct {
-	ID     int    `json:"id"`
-	Title  string `json:"title"`
-	Author string `json:"author"`
-	Year   string `json:"year"`
-}
-
-var books []Book
-
 var db *sql.DB
+var m *mongo.Client
+
+// BookController struct
+type BookController struct{}
 
 func init() {
-	db = h.Init()
+	db = inits.NewDB().Init()
+	m = inits.NewDB().MongoConn()
+
+}
+
+// NewBookController instance
+func NewBookController() *BookController {
+	return &BookController{}
 }
 
 // HomePage is
-func HomePage(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+func (bc BookController) HomePage(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	// log.Println("Home page")
-	fmt.Fprintln(w, "Api Page Refactoring")
+	fmt.Fprintln(w, "Api Welcome Page")
 
 }
 
 // GetBooks is
-func GetBooks(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func (bc BookController) GetBooks(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 
-	var book Book
-	books = []Book{}
+	book := models.Book{}
+	books := []models.Book{}
 
 	rows, err := db.Query("SELECT * FROM books")
 
-	h.LogFatal(err)
+	inits.LogFatal(err)
 
 	defer rows.Close()
 
 	for rows.Next() {
 
 		err := rows.Scan(&book.ID, &book.Title, &book.Author, &book.Year)
-		h.LogFatal(err)
+		inits.LogFatal(err)
 
 		books = append(books, book)
 	}
@@ -61,12 +67,12 @@ func GetBooks(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 }
 
 // GetBook is
-func GetBook(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	var book Book
+func (bc BookController) GetBook(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	book := models.Book{}
 
 	rows := db.QueryRow("Select * From books Where id=$1", ps.ByName("id"))
 	err := rows.Scan(&book.ID, &book.Title, &book.Author, &book.Year)
-	h.LogFatal(err)
+	inits.LogFatal(err)
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
@@ -75,16 +81,19 @@ func GetBook(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 }
 
 // AddBook is
-func AddBook(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	var book Book
-	var bookID int
+func (bc BookController) AddBook(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	book := models.Book{}
 
 	// map json request to book variable
 	json.NewDecoder(r.Body).Decode(&book)
 
-	err := db.QueryRow("Insert into books (title, author, year) values($1, $2, $3) RETURNING id;", book.Title, book.Author, book.Year).Scan(&bookID)
-
-	h.LogFatal(err)
+	collection := m.Database("boolang").Collection("books")
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	res, err := collection.InsertOne(ctx, bson.D{{"title", book.Title}, {"author", book.Author}, {"year", book.Year}})
+	id := res.InsertedID
+	inits.LogFatal(err)
+	fmt.Printf("Created with the id: %s", id)
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
@@ -93,31 +102,32 @@ func AddBook(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 }
 
 // UpdateBook is
-func UpdateBook(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-	var book Book
-	var bookID int
+func (bc BookController) UpdateBook(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	book := models.Book{}
+	bookID := 0
 
 	id, _ := strconv.Atoi(ps.ByName("id"))
 	json.NewDecoder(r.Body).Decode(&book)
 
 	err := db.QueryRow("update books set title=$1, author=$2, year=$3 where id=$4 RETURNING id", &book.Title, &book.Author, &book.Year, id).Scan(&bookID)
 
-	h.LogFatal(err)
+	inits.LogFatal(err)
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
-	json.NewEncoder(w).Encode(book)
+	err = json.NewEncoder(w).Encode(book)
+	inits.LogFatal(err)
 
 }
 
 // DeleteBook is
-func DeleteBook(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func (bc BookController) DeleteBook(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 
 	id, _ := strconv.Atoi(ps.ByName("id"))
 
 	_, err := db.Exec("delete from books where id=$1", id)
 
-	h.LogFatal(err)
+	inits.LogFatal(err)
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
 }
