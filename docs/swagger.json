@@ -1,0 +1,36 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "This is a CRUD application.",
+        "title": "Boolang",
+        "termsOfService": "http://swagger.io/terms/",
+        "contact": {
+            "name": "Lawrence Onaulogho",
+            "url": "https://github.com/asekhamhe/",
+            "email": "lawrence[at][gmail][dot][com]"
+        },
+        "license": {
+            "name": "Apache 2.0",
+            "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+        },
+        "version": "1.0"
+    },
+    "host": "127.0.0.1:8080",
+    "basePath": "/",
+    "paths": {
+        "/home": {
+            "get": {
+                "description": "Test connection",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "HomePage",
+                "responses": {
+                    "200": {
+                        "description": ""
+                    }
+                }
+            }
+        }
+    }
+}

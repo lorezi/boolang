@@ -9,13 +9,13 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/julienschmidt/httprouter"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 
 	"github.com/asekhamhe/boolang/inits"
 	"github.com/asekhamhe/boolang/models"
+	"github.com/gorilla/mux"
 )
 
 var db *sql.DB
@@ -36,14 +36,22 @@ func NewBookController() *BookController {
 }
 
 // HomePage is
-func (bc BookController) HomePage(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+
+// @Summary HomePage
+// @Description Test connection
+// @Produce json
+// @Success 200
+// @Router /home [get]
+func (bc BookController) HomePage(w http.ResponseWriter, r *http.Request) {
 	// log.Println("Home page")
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
 	fmt.Fprintln(w, "Api Welcome Page")
 
 }
 
 // GetBooks is
-func (bc BookController) GetBooks(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func (bc BookController) GetBooks(w http.ResponseWriter, r *http.Request) {
 
 	book := models.Book{}
 	books := []models.Book{}
@@ -70,12 +78,14 @@ func (bc BookController) GetBooks(w http.ResponseWriter, r *http.Request, ps htt
 }
 
 // GetBook is
-func (bc BookController) GetBook(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func (bc BookController) GetBook(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	book := models.Book{}
 
-	id, err := primitive.ObjectIDFromHex(ps.ByName("id"))
+	paramID := mux.Vars(r)
+
+	id, err := primitive.ObjectIDFromHex(paramID["id"])
 	if err != nil {
 		r := models.Result{
 			Status:  "fail",
@@ -109,7 +119,7 @@ func (bc BookController) GetBook(w http.ResponseWriter, r *http.Request, ps http
 }
 
 // AddBook is
-func (bc BookController) AddBook(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func (bc BookController) AddBook(w http.ResponseWriter, r *http.Request) {
 	book := models.Book{}
 
 	// map json request to book variable
@@ -141,10 +151,10 @@ func (bc BookController) AddBook(w http.ResponseWriter, r *http.Request, ps http
 }
 
 // UpdateBook is
-func (bc BookController) UpdateBook(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func (bc BookController) UpdateBook(w http.ResponseWriter, r *http.Request) {
 	book := models.Book{}
-
-	id, err := primitive.ObjectIDFromHex(ps.ByName("id"))
+	paramID := mux.Vars(r)
+	id, err := primitive.ObjectIDFromHex(paramID["id"])
 	inits.LogFatal(err)
 
 	filter := bson.D{
@@ -170,9 +180,10 @@ func (bc BookController) UpdateBook(w http.ResponseWriter, r *http.Request, ps h
 }
 
 // DeleteBook is
-func (bc BookController) DeleteBook(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+func (bc BookController) DeleteBook(w http.ResponseWriter, r *http.Request) {
 
-	id, _ := strconv.Atoi(ps.ByName("id"))
+	paramID := mux.Vars(r)
+	id, _ := strconv.Atoi(paramID["id"])
 
 	_, err := db.Exec("delete from books where id=$1", id)
 

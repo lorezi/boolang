@@ -1,0 +1,25 @@
+basePath: /
+host: 127.0.0.1:8080
+info:
+  contact:
+    email: lawrence[at][gmail][dot][com]
+    name: Lawrence Onaulogho
+    url: https://github.com/asekhamhe/
+  description: This is a CRUD application.
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: Boolang
+  version: "1.0"
+paths:
+  /home:
+    get:
+      description: Test connection
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ""
+      summary: HomePage
+swagger: "2.0"
