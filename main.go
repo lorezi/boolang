@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
+	"github.com/rs/cors"
 
 	"github.com/asekhamhe/boolang/controllers"
 
@@ -43,8 +44,9 @@ func main() {
 
 	r.PathPrefix("/documentation/").Handler(httpSwagger.WrapHandler)
 
+	handler := cors.Default().Handler(r)
 	srv := &http.Server{
-		Handler:      r,
+		Handler:      handler,
 		Addr:         ":8080",
 		WriteTimeout: 15 * time.Second,
 		ReadTimeout:  15 * time.Second,

@@ -1,4 +1,25 @@
 basePath: /
+definitions:
+  models.Book:
+    properties:
+      author:
+        type: string
+      id:
+        type: string
+      title:
+        type: string
+      year:
+        type: string
+    type: object
+  models.CreateBook:
+    properties:
+      author:
+        type: string
+      title:
+        type: string
+      year:
+        type: string
+    type: object
 host: 127.0.0.1:8080
 info:
   contact:
@@ -13,13 +34,66 @@ info:
   title: Boolang
   version: "1.0"
 paths:
-  /home:
+  /books:
     get:
-      description: Test connection
+      description: fetch list of books
       produces:
       - application/json
       responses:
         "200":
+          description: ok
+          schema:
+            $ref: '#/definitions/models.Book'
+      summary: GetBooks
+    post:
+      consumes:
+      - application/json
+      description: create a new book
+      parameters:
+      - description: book model
+        in: body
+        name: id
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateBook'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: ok
+          schema:
+            $ref: '#/definitions/models.CreateBook'
+      summary: CreateBook
+  /books/{id}:
+    get:
+      description: fetch a single book
+      parameters:
+      - description: Book ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ok
+          schema:
+            $ref: '#/definitions/models.Book'
+      summary: GetBook
+  /home:
+    get:
+      description: Test connection
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: ok
+          schema:
+            type: string
+        default:
           description: ""
+          schema:
+            type: string
       summary: HomePage
 swagger: "2.0"

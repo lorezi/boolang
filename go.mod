@@ -10,6 +10,7 @@ require (
 	github.com/lib/pq v1.9.0
 	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/pilu/fresh v0.0.0-20190826141211-0fa698148017 // indirect
+	github.com/rs/cors v1.7.0
 	github.com/stretchr/testify v1.7.0 // indirect
 	github.com/subosito/gotenv v1.2.0
 	github.com/swaggo/http-swagger v1.0.0
