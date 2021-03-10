@@ -2,7 +2,8 @@ package models
 
 // ExpBook model
 type ExpBook struct {
-	ID   string `json:"id" bson:"_id"`
+	ID string `json:"id" bson:"_id"`
+	// bson:inline flattens data structure
 	Book `bson:"inline"`
 }
 
