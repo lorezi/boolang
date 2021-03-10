@@ -22,7 +22,8 @@ var db *sql.DB
 var m *mongo.Client
 
 // BookController struct
-type BookController struct{}
+type BookController struct {
+}
 
 func init() {
 	db = inits.NewDB().Init()
@@ -58,8 +59,8 @@ func (bc BookController) HomePage(w http.ResponseWriter, r *http.Request) {
 // @Router /books [get]
 func (bc BookController) GetBooks(w http.ResponseWriter, r *http.Request) {
 
-	book := models.Book{}
-	books := []models.Book{}
+	book := models.ExpBook{}
+	books := []models.ExpBook{}
 
 	collection := m.Database("boolang").Collection("books")
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
@@ -73,6 +74,8 @@ func (bc BookController) GetBooks(w http.ResponseWriter, r *http.Request) {
 
 		err := res.Decode(&book)
 		inits.LogFatal(err)
+		// fmt.Println(book.Author)
+		// fmt.Println()
 
 		books = append(books, book)
 	}
@@ -92,7 +95,7 @@ func (bc BookController) GetBooks(w http.ResponseWriter, r *http.Request) {
 func (bc BookController) GetBook(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	book := models.Book{}
+	book := models.ExpBook{}
 
 	paramID := mux.Vars(r)
 
@@ -138,16 +141,16 @@ func (bc BookController) GetBook(w http.ResponseWriter, r *http.Request) {
 // @Success 201 {object} models.CreateBook "ok"
 // @Router /books [post]
 func (bc BookController) AddBook(w http.ResponseWriter, r *http.Request) {
-	book := models.CreateBook{}
+	b := models.Book{}
 
-	// map json request to book variable
-	json.NewDecoder(r.Body).Decode(&book)
+	// map json request to b variable
+	json.NewDecoder(r.Body).Decode(&b)
 
 	collection := m.Database("boolang").Collection("books")
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	_, err := collection.InsertOne(ctx, book)
+	res, err := collection.InsertOne(ctx, b)
 	if err != nil {
 		r := models.Result{
 			Status:  "fail",
@@ -160,11 +163,16 @@ func (bc BookController) AddBook(w http.ResponseWriter, r *http.Request) {
 	// id := res.InsertedID
 
 	// converts primitive objectID type to string
-	// book.ID = id.(primitive.ObjectID).Hex()
+	id := res.InsertedID.(primitive.ObjectID).Hex()
+
+	nb := models.ExpBook{
+		ID:   id,
+		Book: b,
+	}
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(book)
+	json.NewEncoder(w).Encode(nb)
 
 }
 
