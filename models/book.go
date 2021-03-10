@@ -3,7 +3,7 @@ package models
 // ExpBook model
 type ExpBook struct {
 	ID string `json:"id" bson:"_id"`
-	// bson:inline flattens data structure
+	// bson:inline flattens anonymous field for mongo driver
 	Book `bson:"inline"`
 }
 
