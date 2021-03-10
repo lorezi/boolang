@@ -59,8 +59,8 @@ func (bc BookController) HomePage(w http.ResponseWriter, r *http.Request) {
 // @Router /books [get]
 func (bc BookController) GetBooks(w http.ResponseWriter, r *http.Request) {
 
-	book := models.ExpBook{}
-	books := []models.ExpBook{}
+	book := models.BookResult{}
+	books := []models.BookResult{}
 
 	collection := m.Database("boolang").Collection("books")
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
@@ -95,7 +95,7 @@ func (bc BookController) GetBooks(w http.ResponseWriter, r *http.Request) {
 func (bc BookController) GetBook(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	book := models.ExpBook{}
+	book := models.BookResult{}
 
 	paramID := mux.Vars(r)
 
@@ -165,7 +165,7 @@ func (bc BookController) AddBook(w http.ResponseWriter, r *http.Request) {
 	// converts primitive objectID type to string
 	id := res.InsertedID.(primitive.ObjectID).Hex()
 
-	nb := models.ExpBook{
+	nb := models.BookResult{
 		ID:   id,
 		Book: b,
 	}
