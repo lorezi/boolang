@@ -28,7 +28,7 @@ type BookController struct {
 }
 
 func init() {
-	db = inits.NewDB().Init()
+	db = inits.NewDB().PostgresInit()
 	m = inits.NewDB().MongoConn()
 
 }

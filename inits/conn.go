@@ -27,7 +27,7 @@ func NewDB() *DB {
 }
 
 // Init is ...
-func (conn *DB) Init() *sql.DB {
+func (conn *DB) PostgresInit() *sql.DB {
 	gotenv.Load()
 
 	db, err := sql.Open("postgres", os.Getenv("ELEPHANTSQL_URL"))
@@ -59,6 +59,7 @@ func Error404(err error, w http.ResponseWriter) {
 
 // MongoConn is connection setting
 func (conn *DB) MongoConn() *mongo.Client {
+	gotenv.Load()
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()

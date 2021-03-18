@@ -34,6 +34,7 @@ func main() {
 
 	r := mux.NewRouter()
 	bc := controllers.NewBookController()
+	uc := controllers.NewUserController()
 
 	r.HandleFunc("/home", bc.HomePage).Methods("GET")
 	r.HandleFunc("/books", bc.GetBooks).Methods("GET").Queries("limit", "{limit:[0-9]+}", "page", "{page:[0-9]+}")
@@ -41,6 +42,8 @@ func main() {
 	r.HandleFunc("/books", bc.AddBook).Methods("POST")
 	r.HandleFunc("/books/{id}", bc.UpdateBook).Methods("PATCH")
 	r.HandleFunc("/books/{id}", bc.DeleteBook).Methods("DELETE")
+	r.HandleFunc("/users", uc.CreateUser).Methods("POST")
+	// r.Use(middleware.Authentication)
 
 	r.PathPrefix("/documentation/").Handler(httpSwagger.WrapHandler)
 
