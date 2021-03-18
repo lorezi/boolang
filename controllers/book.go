@@ -13,9 +13,11 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 
-	"github.com/asekhamhe/boolang/inits"
-	"github.com/asekhamhe/boolang/models"
+	. "github.com/gobeam/mongo-go-pagination"
+
 	"github.com/gorilla/mux"
+	"github.com/lorezi/boolang/inits"
+	"github.com/lorezi/boolang/models"
 )
 
 var db *sql.DB
@@ -59,26 +61,43 @@ func (bc BookController) HomePage(w http.ResponseWriter, r *http.Request) {
 // @Router /books [get]
 func (bc BookController) GetBooks(w http.ResponseWriter, r *http.Request) {
 
-	book := models.BookResult{}
+	// book := models.BookResult{}
 	books := []models.BookResult{}
+	limit, err := strconv.ParseInt(r.URL.Query().Get("limit"), 10, 64)
+	inits.LogFatal(err)
+	page, err := strconv.ParseInt(r.URL.Query().Get("page"), 10, 64)
+	inits.LogFatal(err)
 
-	collection := m.Database("boolang").Collection("books")
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
+	collection := m.Database("boolang").Collection("books")
+
 	filter := bson.D{{}}
-	res, err := collection.Find(ctx, filter)
+
+	paginatedData, err := New(collection).Context(ctx).Limit(limit).Page(page).Filter(filter).Decode(&books).Find()
 	inits.LogFatal(err)
 
-	for res.Next(ctx) {
+	for _, v := range paginatedData.Data {
+		var book *models.BookResult
 
-		err := res.Decode(&book)
-		inits.LogFatal(err)
-		// fmt.Println(book.Author)
-		// fmt.Println()
+		if err := bson.Unmarshal(v, &book); err == nil {
 
-		books = append(books, book)
+			fmt.Printf("books: %v\n", *book)
+			books = append(books, *book)
+		}
+
 	}
+
+	// for res.Pagination.Next(ctx) {
+
+	// 	err := res.Decode(&book)
+	// 	inits.LogFatal(err)
+	// 	// fmt.Println(book.Author)
+	// 	// fmt.Println()
+
+	// 	books = append(books, book)
+	// }
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)

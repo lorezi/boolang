@@ -8,11 +8,11 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/rs/cors"
 
-	"github.com/asekhamhe/boolang/controllers"
+	"github.com/lorezi/boolang/controllers"
 
 	httpSwagger "github.com/swaggo/http-swagger"
 
-	_ "github.com/asekhamhe/boolang/docs"
+	_ "github.com/lorezi/boolang/docs"
 )
 
 // @title Boolang
@@ -21,7 +21,7 @@ import (
 // @termsOfService http://swagger.io/terms/
 
 // @contact.name Lawrence Onaulogho
-// @contact.url https://github.com/asekhamhe/
+// @contact.url https://github.com/lorezi/
 // @contact.email lawrence[at][gmail][dot][com]
 
 // @license.name Apache 2.0
@@ -36,7 +36,7 @@ func main() {
 	bc := controllers.NewBookController()
 
 	r.HandleFunc("/home", bc.HomePage).Methods("GET")
-	r.HandleFunc("/books", bc.GetBooks).Methods("GET")
+	r.HandleFunc("/books", bc.GetBooks).Methods("GET").Queries("limit", "{limit:[0-9]+}", "page", "{page:[0-9]+}")
 	r.HandleFunc("/books/{id}", bc.GetBook).Methods("GET")
 	r.HandleFunc("/books", bc.AddBook).Methods("POST")
 	r.HandleFunc("/books/{id}", bc.UpdateBook).Methods("PATCH")
