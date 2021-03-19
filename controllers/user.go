@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/go-playground/validator"
 	"github.com/lorezi/boolang/helpers"
 	"github.com/lorezi/boolang/inits"
 	"github.com/lorezi/boolang/models"
@@ -14,7 +15,7 @@ import (
 )
 
 // var mu *mongo.Client = inits.NewDB().MongoConn()
-// var validate = validator.New()
+var validate = validator.New()
 
 // UserController Struct
 type UserController struct {
@@ -71,16 +72,16 @@ func (uc UserController) CreateUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// validate the struct
-	// err = validate.Struct(u)
-	// if err != nil {
-	// 	r := models.Result{
-	// 		Status:  "error",
-	// 		Message: err.Error(),
-	// 	}
-	// 	w.WriteHeader(http.StatusBadRequest)
-	// 	json.NewEncoder(w).Encode(r)
-	// 	return
-	// }
+	err = validate.Struct(u)
+	if err != nil {
+		r := models.Result{
+			Status:  "validation error",
+			Message: err.Error(),
+		}
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(r)
+		return
+	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
