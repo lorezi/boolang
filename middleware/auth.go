@@ -2,7 +2,6 @@ package middleware
 
 import (
 	"encoding/json"
-	"log"
 	"net/http"
 
 	"github.com/lorezi/boolang/helpers"
@@ -13,8 +12,7 @@ import (
 
 func Authentication(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// Do stuff here
-		log.Println(r.RequestURI)
+		w.Header().Set("Content-Type", "application/json")
 		clientToken := r.Header.Get("token")
 		if clientToken == "" {
 			r := models.Result{
