@@ -9,6 +9,7 @@ import (
 	"github.com/rs/cors"
 
 	"github.com/lorezi/boolang/controllers"
+	"github.com/lorezi/boolang/middleware"
 
 	httpSwagger "github.com/swaggo/http-swagger"
 
@@ -42,9 +43,10 @@ func main() {
 	r.HandleFunc("/books", bc.AddBook).Methods("POST")
 	r.HandleFunc("/books/{id}", bc.UpdateBook).Methods("PATCH")
 	r.HandleFunc("/books/{id}", bc.DeleteBook).Methods("DELETE")
-	r.HandleFunc("/users", uc.CreateUser).Methods("POST")
-	// r.Use(middleware.Authentication)
+	r.HandleFunc("/users/login", uc.CreateUser).Methods("POST")
+	r.Use(middleware.Authentication)
 
+	r.HandleFunc("/users/signup", uc.CreateUser).Methods("POST")
 	r.PathPrefix("/documentation/").Handler(httpSwagger.WrapHandler)
 
 	handler := cors.Default().Handler(r)

@@ -112,7 +112,7 @@ func (uc UserController) CreateUser(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		r := models.Result{
 			Status:  "fail",
-			Message: "User item was not created 😰😰😰",
+			Message: "User account was not created 😰😰😰",
 		}
 		w.WriteHeader(500)
 		json.NewEncoder(w).Encode(r)
