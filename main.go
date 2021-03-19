@@ -37,7 +37,7 @@ func main() {
 	bc := controllers.NewBookController()
 	uc := controllers.NewUserController()
 
-	subr := r.PathPrefix("/api/v2").Subrouter()
+	subr := r.PathPrefix("/api/v1").Subrouter()
 	subr.Use(middleware.Authentication)
 
 	subr.HandleFunc("/home", bc.HomePage).Methods("GET")
