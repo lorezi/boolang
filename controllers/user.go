@@ -3,28 +3,21 @@ package controllers
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"time"
 
-	"github.com/go-playground/validator/v10"
 	"github.com/lorezi/boolang/helpers"
 	"github.com/lorezi/boolang/inits"
 	"github.com/lorezi/boolang/models"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo"
 	"golang.org/x/crypto/bcrypt"
 )
 
-var mu *mongo.Client
-var validate = validator.New()
+// var mu *mongo.Client = inits.NewDB().MongoConn()
+// var validate = validator.New()
 
 // UserController Struct
 type UserController struct {
-}
-
-func init() {
-	mu = inits.NewDB().MongoConn()
 }
 
 // NewUserController instance
@@ -96,7 +89,6 @@ func (uc UserController) CreateUser(w http.ResponseWriter, r *http.Request) {
 
 	pw := HashPassword(u.Password)
 	u.Password = pw
-	fmt.Println(pw)
 	u.CreatedAt, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
 	u.UpdatedAt, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
 	u.ID = primitive.NewObjectID()

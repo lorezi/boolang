@@ -7,12 +7,13 @@ import (
 )
 
 // User Model
+
 type User struct {
-	ID           primitive.ObjectID `bson:"_id"`
+	ID           primitive.ObjectID `json:"-" bson:"_id"`
 	FirstName    string             `json:"first_name" bson:"first_name"`
 	LastName     string             `json:"last_name" bson:"last_name"`
 	Email        string             `json:"email" bson:"email"`
-	Password     string             `json:"password" bson:"password"`
+	Password     string             `json:"-" bson:"password"`
 	PhoneNo      string             `json:"phone_no" bson:"phone_no"`
 	Address      string             `json:"address" bson:"address"`
 	Token        string             `json:"token" bson:"token"`
