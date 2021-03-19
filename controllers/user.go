@@ -99,18 +99,6 @@ func (uc UserController) GetUser(w http.ResponseWriter, r *http.Request) {
 
 	u := models.User{}
 
-	// map json request to u variable
-	err := json.NewDecoder(r.Body).Decode(&u)
-	if err != nil {
-		r := models.Result{
-			Status:  "error",
-			Message: err.Error(),
-		}
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(r)
-		return
-	}
-
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -119,7 +107,7 @@ func (uc UserController) GetUser(w http.ResponseWriter, r *http.Request) {
 	p := mux.Vars(r)
 	f := bson.M{"user_id": p["id"]}
 
-	err = c.FindOne(ctx, f).Decode(&u)
+	err := c.FindOne(ctx, f).Decode(&u)
 	if err != nil {
 		r := models.Result{
 			Status:  "error",

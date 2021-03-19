@@ -47,8 +47,8 @@ func main() {
 	subr.HandleFunc("/books/{id}", bc.UpdateBook).Methods("PATCH")
 	subr.HandleFunc("/books/{id}", bc.DeleteBook).Methods("DELETE")
 
-	subr.HandleFunc("/users/{id}", uc.Update).Methods("PATCH")
 	subr.HandleFunc("/users/{id}", uc.GetUser).Methods("GET")
+	subr.HandleFunc("/users/{id}", uc.Update).Methods("PATCH")
 	subr.HandleFunc("/users", uc.GetUsers).Methods("GET").Queries("limit", "{limit:[0-9]+}", "page", "{page:[0-9]+}")
 
 	r.HandleFunc("/users/login", uc.Login).Methods("POST")
