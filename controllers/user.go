@@ -94,6 +94,47 @@ func (uc UserController) GetUsers(w http.ResponseWriter, r *http.Request) {
 
 }
 
+func (uc UserController) GetUser(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	u := models.User{}
+
+	// map json request to u variable
+	err := json.NewDecoder(r.Body).Decode(&u)
+	if err != nil {
+		r := models.Result{
+			Status:  "error",
+			Message: err.Error(),
+		}
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(r)
+		return
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	c := m.Database("boolang").Collection("users")
+
+	p := mux.Vars(r)
+	f := bson.M{"user_id": p["id"]}
+
+	err = c.FindOne(ctx, f).Decode(&u)
+	if err != nil {
+		r := models.Result{
+			Status:  "error",
+			Message: "user does not exist",
+		}
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(r)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(u)
+
+}
+
 // CreateUser is the api used to create a new user
 
 func (uc UserController) CreateUser(w http.ResponseWriter, r *http.Request) {
@@ -221,7 +262,7 @@ func (uc UserController) Update(w http.ResponseWriter, r *http.Request) {
 		Upsert: &upsert,
 	}
 
-	res, err := collection.UpdateOne(ctx, filter, bson.D{{Key: "$set", Value: uu}}, &opts)
+	_, err = collection.UpdateOne(ctx, filter, bson.D{{Key: "$set", Value: uu}}, &opts)
 	if err != nil {
 		r := models.Result{
 			Status:  "error",
@@ -232,8 +273,13 @@ func (uc UserController) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	msg := models.Result{
+		Status:  "success",
+		Message: "user account updated successfully",
+	}
+
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(res)
+	json.NewEncoder(w).Encode(msg)
 
 }
 
