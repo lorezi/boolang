@@ -8,19 +8,12 @@ import (
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/lorezi/boolang/inits"
+	"github.com/lorezi/boolang/models"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
-
-type SignedDetails struct {
-	Email     string
-	FirstName string
-	LastName  string
-	UID       string
-	jwt.StandardClaims
-}
 
 var mt *mongo.Client
 
@@ -32,7 +25,7 @@ func init() {
 
 //GenerateAllTokens generate both the detailed token and refresh token
 func GenerateAllTokens(email string, firstName string, lastName, uid string) (string, string, error) {
-	claims := &SignedDetails{
+	claims := &models.SignedDetails{
 		Email:     email,
 		FirstName: firstName,
 		LastName:  lastName,
@@ -42,7 +35,7 @@ func GenerateAllTokens(email string, firstName string, lastName, uid string) (st
 		},
 	}
 
-	refreshClaims := &SignedDetails{
+	refreshClaims := &models.SignedDetails{
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: time.Now().Local().Add(time.Hour * time.Duration(168)).Unix(),
 		},
@@ -65,10 +58,10 @@ func GenerateAllTokens(email string, firstName string, lastName, uid string) (st
 }
 
 // ValidateToken validates the jwt token
-func ValidateToken(signedToken string) (claims *SignedDetails, msg string) {
+func ValidateToken(signedToken string) (claims *models.SignedDetails, msg string) {
 	token, err := jwt.ParseWithClaims(
 		signedToken,
-		&SignedDetails{},
+		&models.SignedDetails{},
 		func(t *jwt.Token) (interface{}, error) {
 			return []byte(SECRET_KEY), nil
 		},
@@ -78,7 +71,7 @@ func ValidateToken(signedToken string) (claims *SignedDetails, msg string) {
 		return
 	}
 
-	claims, ok := token.Claims.(*SignedDetails)
+	claims, ok := token.Claims.(*models.SignedDetails)
 	if !ok {
 		msg = "the token is invalid"
 		msg = err.Error()
