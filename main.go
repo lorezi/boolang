@@ -47,7 +47,7 @@ func main() {
 	subr.HandleFunc("/books/{id}", bc.UpdateBook).Methods("PATCH")
 	subr.HandleFunc("/books/{id}", bc.DeleteBook).Methods("DELETE")
 
-	r.HandleFunc("/users/login", uc.CreateUser).Methods("POST")
+	r.HandleFunc("/users/login", uc.Login).Methods("POST")
 	r.HandleFunc("/users/signup", uc.CreateUser).Methods("POST")
 	r.PathPrefix("/documentation/").Handler(httpSwagger.WrapHandler)
 

@@ -3,6 +3,7 @@ package controllers
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -162,6 +163,7 @@ func (uc UserController) Login(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(r)
 		return
 	}
+	fmt.Println("am here")
 
 	ok, msg := VerifyPassword(logu.Password, u.Password)
 	if !ok {
