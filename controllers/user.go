@@ -74,6 +74,13 @@ func (uc UserController) CreateUser(w http.ResponseWriter, r *http.Request) {
 	// validate the struct
 	err = validate.Struct(u)
 	if err != nil {
+		// var msg string
+		// for _, err := range err.(validator.ValidationErrors) {
+		// 	msg += err.Field()
+		// 	msg += " " + err.Tag()
+		// 	msg += " " + err.Type().String() + ", "
+
+		// }
 		r := models.Result{
 			Status:  "validation error",
 			Message: err.Error(),
