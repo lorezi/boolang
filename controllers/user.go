@@ -5,7 +5,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
 	"time"
+
+	. "github.com/gobeam/mongo-go-pagination"
 
 	"github.com/go-playground/validator"
 	"github.com/lorezi/boolang/helpers"
@@ -28,15 +31,15 @@ func NewUserController() *UserController {
 	return &UserController{}
 }
 
-// HashPassword is used to encrypt the password before it is stored in the DB
-func HashPassword(password string) string {
+// hashPassword is used to encrypt the password before it is stored in the DB
+func hashPassword(password string) string {
 	bs, err := bcrypt.GenerateFromPassword([]byte(password), 12)
 	inits.LogFatal(err)
 	return string(bs)
 }
 
-// VerifyPassword checks the input password while verifying it the password in the DB.
-func VerifyPassword(up string, pp string) (bool, string) {
+// verifyPassword checks the input password while verifying it the password in the DB.
+func verifyPassword(up string, pp string) (bool, string) {
 	err := bcrypt.CompareHashAndPassword([]byte(pp), []byte(up))
 	check := true
 	msg := ""
@@ -50,6 +53,42 @@ func VerifyPassword(up string, pp string) (bool, string) {
 
 // GetUsers returns all users
 func (uc UserController) GetUsers(w http.ResponseWriter, r *http.Request) {
+
+	w.Header().Set("Content-Type", "application/json")
+
+	su := []models.User{}
+
+	limit, err := strconv.ParseInt(r.URL.Query().Get("limit"), 10, 64)
+	if err != nil {
+		http.Error(w, "limit query params missing...😵😵😵", http.StatusNotFound)
+	}
+
+	page, err := strconv.ParseInt(r.URL.Query().Get("page"), 10, 64)
+	if err != nil {
+		http.Error(w, "page query params missing...😵😵😵", http.StatusNotFound)
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	collection := m.Database("boolang").Collection("users")
+	filter := bson.D{{}}
+
+	res, err := New(collection).Context(ctx).Limit(limit).Page(page).Filter(filter).Decode(&su).Find()
+	if err != nil {
+		http.Error(w, "Server error 😵😵😵", http.StatusInternalServerError)
+	}
+
+	for _, v := range res.Data {
+		var u *models.User
+
+		if err := bson.Unmarshal(v, &u); err == nil {
+			su = append(su, *u)
+		}
+	}
+
+	w.WriteHeader(200)
+	json.NewEncoder(w).Encode(su)
 
 }
 
@@ -97,7 +136,7 @@ func (uc UserController) CreateUser(w http.ResponseWriter, r *http.Request) {
 
 	collection := m.Database("boolang").Collection("users")
 
-	pw := HashPassword(u.Password)
+	pw := hashPassword(u.Password)
 	u.Password = pw
 	u.CreatedAt, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
 	u.UpdatedAt, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
@@ -165,7 +204,7 @@ func (uc UserController) Login(w http.ResponseWriter, r *http.Request) {
 	}
 	fmt.Println("am here")
 
-	ok, msg := VerifyPassword(logu.Password, u.Password)
+	ok, msg := verifyPassword(logu.Password, u.Password)
 	if !ok {
 		r := models.Result{
 			Status:  "error",

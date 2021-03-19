@@ -75,29 +75,18 @@ func (bc BookController) GetBooks(w http.ResponseWriter, r *http.Request) {
 
 	filter := bson.D{{}}
 
-	paginatedData, err := New(collection).Context(ctx).Limit(limit).Page(page).Filter(filter).Decode(&books).Find()
+	res, err := New(collection).Context(ctx).Limit(limit).Page(page).Filter(filter).Decode(&books).Find()
 	inits.LogFatal(err)
 
-	for _, v := range paginatedData.Data {
+	for _, v := range res.Data {
 		var book *models.BookResult
 
 		if err := bson.Unmarshal(v, &book); err == nil {
 
-			fmt.Printf("books: %v\n", *book)
 			books = append(books, *book)
 		}
 
 	}
-
-	// for res.Pagination.Next(ctx) {
-
-	// 	err := res.Decode(&book)
-	// 	inits.LogFatal(err)
-	// 	// fmt.Println(book.Author)
-	// 	// fmt.Println()
-
-	// 	books = append(books, book)
-	// }
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
