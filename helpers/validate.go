@@ -1,13 +1,16 @@
+// Helper package for miscellaneous functions for validations
 package helpers
 
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"strings"
 )
 
-func JSONValidate(err error) string {
+// JSONValidator to validate json request payload 👁👁👀
+func JSONValidator(err error) string {
 	var ute *json.UnmarshalTypeError
 	var se *json.SyntaxError
 
@@ -19,7 +22,8 @@ func JSONValidate(err error) string {
 		return "Unexpected field value"
 
 	case strings.HasPrefix(err.Error(), "json: unknown field "):
-		return "Unexpected field name"
+		fn := strings.TrimPrefix(err.Error(), "json: unknown field ")
+		return fmt.Sprintf("Unexpected field name: %s", fn)
 
 	default:
 		return "Invalid request payload"
