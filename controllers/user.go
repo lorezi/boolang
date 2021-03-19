@@ -9,6 +9,7 @@ import (
 	"time"
 
 	. "github.com/gobeam/mongo-go-pagination"
+	"github.com/gorilla/mux"
 
 	"github.com/go-playground/validator"
 	"github.com/lorezi/boolang/helpers"
@@ -16,6 +17,7 @@ import (
 	"github.com/lorezi/boolang/models"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo/options"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -161,6 +163,77 @@ func (uc UserController) CreateUser(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(u)
+
+}
+
+// Update user method
+func (uc UserController) Update(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	u := models.User{}
+
+	err := json.NewDecoder(r.Body).Decode(&u)
+	if err != nil {
+		r := models.Result{
+			Status:  "error",
+			Message: err.Error(),
+		}
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(r)
+		return
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	collection := m.Database("boolang").Collection("users")
+
+	p := mux.Vars(r)
+	filter := bson.M{"user_id": p["id"]}
+
+	var uu primitive.D
+
+	if u.FirstName != "" {
+		uu = append(uu, bson.E{Key: "first_name", Value: u.FirstName})
+	}
+
+	if u.LastName != "" {
+		uu = append(uu, bson.E{Key: "last_name", Value: u.LastName})
+	}
+
+	if u.Email != "" {
+		uu = append(uu, bson.E{Key: "email", Value: u.Email})
+	}
+
+	if u.PhoneNo != "" {
+		uu = append(uu, bson.E{Key: "phone_no", Value: u.PhoneNo})
+	}
+
+	if u.Address != "" {
+		uu = append(uu, bson.E{Key: "address", Value: u.Address})
+	}
+
+	u.UpdatedAt, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
+	uu = append(uu, bson.E{Key: "updated_at", Value: u.UpdatedAt})
+
+	upsert := true
+	opts := options.UpdateOptions{
+		Upsert: &upsert,
+	}
+
+	res, err := collection.UpdateOne(ctx, filter, bson.D{{Key: "$set", Value: uu}}, &opts)
+	if err != nil {
+		r := models.Result{
+			Status:  "error",
+			Message: "unable to update user",
+		}
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(r)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(res)
 
 }
 
