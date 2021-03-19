@@ -31,12 +31,14 @@ func GenerateAllTokens(email string, firstName string, lastName, uid string) (st
 		LastName:  lastName,
 		UID:       uid,
 		StandardClaims: jwt.StandardClaims{
+			// duration 1day
 			ExpiresAt: time.Now().Add(time.Hour * time.Duration(24)).Unix(),
 		},
 	}
 
 	refreshClaims := &models.SignedDetails{
 		StandardClaims: jwt.StandardClaims{
+			// duration 7days
 			ExpiresAt: time.Now().Local().Add(time.Hour * time.Duration(168)).Unix(),
 		},
 	}
@@ -48,7 +50,6 @@ func GenerateAllTokens(email string, firstName string, lastName, uid string) (st
 	}
 
 	refreshToken, err := jwt.NewWithClaims(jwt.SigningMethodHS256, refreshClaims).SignedString([]byte(SECRET_KEY))
-
 	if err != nil {
 		log.Panic(err)
 		return "", "", err
@@ -90,6 +91,7 @@ func UpdateAllTokens(signedToken string, signedRefreshToken string, userId strin
 
 	collection := mt.Database("boolang").Collection("users")
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 
 	var updateObj primitive.D
 
@@ -110,13 +112,10 @@ func UpdateAllTokens(signedToken string, signedRefreshToken string, userId strin
 		},
 		&opt,
 	)
-	defer cancel()
 
 	if err != nil {
 		log.Panic(err)
-		return
-	}
 
-	// return
+	}
 
 }
