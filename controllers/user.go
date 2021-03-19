@@ -10,6 +10,7 @@ import (
 	"github.com/lorezi/boolang/helpers"
 	"github.com/lorezi/boolang/inits"
 	"github.com/lorezi/boolang/models"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -119,6 +120,64 @@ func (uc UserController) CreateUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(u)
+
+}
+
+func (uc UserController) Login(w http.ResponseWriter, r *http.Request) {
+
+	w.Header().Set("Content-Type", "application/json")
+	// logged user
+	logu := models.Login{}
+	// user
+	u := models.User{}
+
+	// map json request to u variable
+	err := json.NewDecoder(r.Body).Decode(&logu)
+	if err != nil {
+		r := models.Result{
+			Status:  "error",
+			Message: err.Error(),
+		}
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(r)
+		return
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	collection := m.Database("boolang").Collection("users")
+
+	filter := bson.M{
+		"email": logu.Email,
+	}
+	err = collection.FindOne(ctx, filter).Decode(&u)
+	if err != nil {
+		r := models.Result{
+			Status:  "error",
+			Message: "login or password incorrect",
+		}
+		w.WriteHeader(http.StatusForbidden)
+		json.NewEncoder(w).Encode(r)
+		return
+	}
+
+	ok, msg := VerifyPassword(logu.Password, u.Password)
+	if !ok {
+		r := models.Result{
+			Status:  "error",
+			Message: msg,
+		}
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(r)
+		return
+	}
+
+	tk, rtk, _ := helpers.GenerateAllTokens(u.Email, u.FirstName, u.LastName, u.UserID)
+	helpers.UpdateAllTokens(tk, rtk, u.UserID)
+
+	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(u)
 
 }

@@ -22,3 +22,8 @@ type User struct {
 	UpdatedAt    time.Time          `json:"updated_at" bson:"updated_at"`
 	UserID       string             `json:"user_id" bson:"user_id"`
 }
+
+type Login struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
