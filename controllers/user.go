@@ -201,11 +201,14 @@ func (uc UserController) Update(w http.ResponseWriter, r *http.Request) {
 
 	u := models.User{}
 
-	err := json.NewDecoder(r.Body).Decode(&u)
+	d := json.NewDecoder(r.Body)
+	d.DisallowUnknownFields()
+	err := d.Decode(&u)
 	if err != nil {
+		msg := helpers.JSONValidate(err)
 		r := models.Result{
 			Status:  "error",
-			Message: err.Error(),
+			Message: msg,
 		}
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(r)
