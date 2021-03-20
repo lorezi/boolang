@@ -38,8 +38,8 @@ func Authentication(next http.Handler) http.Handler {
 		}
 
 		if strings.HasPrefix(clientToken, "Bearer") {
-			ss := strings.Split(clientToken, " ")
-			tk := strings.TrimSpace(ss[1])
+
+			tk := strings.TrimPrefix(clientToken, "Bearer ")
 
 			claims, err := helpers.ValidateToken(tk)
 
