@@ -199,7 +199,7 @@ func (uc UserController) CreateUser(w http.ResponseWriter, r *http.Request) {
 }
 
 // Update user method
-func (uc UserController) Update(w http.ResponseWriter, r *http.Request) {
+func (uc UserController) UpdateUser(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	u := models.User{}
