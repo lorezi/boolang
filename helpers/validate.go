@@ -11,8 +11,11 @@ import (
 
 // JSONValidator to validate json request payload 👁👁👀
 func JSONValidator(err error) string {
-	var ute *json.UnmarshalTypeError
-	var se *json.SyntaxError
+
+	var (
+		ute *json.UnmarshalTypeError
+		se  *json.SyntaxError
+	)
 
 	switch {
 	case errors.Is(err, io.EOF), errors.Is(err, io.ErrUnexpectedEOF), errors.As(err, &se):

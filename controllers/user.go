@@ -3,7 +3,6 @@ package controllers
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"strconv"
 	"time"
@@ -281,12 +280,12 @@ func (uc UserController) Login(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	// logged user
-	logu := models.Login{}
+	loggedu := models.Login{}
 	// user
 	u := models.User{}
 
 	// map json request to u variable
-	err := json.NewDecoder(r.Body).Decode(&logu)
+	err := json.NewDecoder(r.Body).Decode(&loggedu)
 	if err != nil {
 		r := models.Result{
 			Status:  "error",
@@ -303,7 +302,7 @@ func (uc UserController) Login(w http.ResponseWriter, r *http.Request) {
 	collection := m.Database("boolang").Collection("users")
 
 	filter := bson.M{
-		"email": logu.Email,
+		"email": loggedu.Email,
 	}
 	err = collection.FindOne(ctx, filter).Decode(&u)
 	if err != nil {
@@ -315,9 +314,8 @@ func (uc UserController) Login(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(r)
 		return
 	}
-	fmt.Println("am here")
 
-	ok, msg := verifyPassword(logu.Password, u.Password)
+	ok, msg := verifyPassword(loggedu.Password, u.Password)
 	if !ok {
 		r := models.Result{
 			Status:  "error",
