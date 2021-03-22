@@ -68,7 +68,7 @@ func (bc BookController) GetBooks(w http.ResponseWriter, r *http.Request) {
 	page, err := strconv.ParseInt(r.URL.Query().Get("page"), 10, 64)
 	inits.LogFatal(err)
 
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 100*time.Second)
 	defer cancel()
 
 	collection := m.Database("boolang").Collection("books")
@@ -155,15 +155,14 @@ func (bc BookController) AddBook(w http.ResponseWriter, r *http.Request) {
 	json.NewDecoder(r.Body).Decode(&b)
 
 	collection := m.Database("boolang").Collection("books")
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 100*time.Second)
 	defer cancel()
 
-	b.Permission.UUID = primitive.NewObjectID().Hex()
 	res, err := collection.InsertOne(ctx, b)
 	if err != nil {
 		r := models.Result{
 			Status:  "fail",
-			Message: "Server error 😰😰😰",
+			Message: err.Error(),
 		}
 		w.WriteHeader(500)
 		json.NewEncoder(w).Encode(r)
