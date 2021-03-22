@@ -3,6 +3,7 @@ package controllers
 import (
 	"context"
 	"encoding/json"
+	"io"
 	"net/http"
 	"strconv"
 	"time"
@@ -129,8 +130,8 @@ func (uc UserController) CreateUser(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	u := models.User{}
-
-	if err := helpers.JSONDecoder(r.Body, w, &u); err != nil {
+	d, err := helpers.JSONDecoder(r.Body, w, &u)
+	if err != nil {
 		msg, err := helpers.JSONValidator(err)
 		r := models.Result{
 			Status:  "error",
@@ -141,8 +142,20 @@ func (uc UserController) CreateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// validate for single object json {}
+	err = d.Decode(&struct{}{})
+	if err != io.EOF {
+		r := models.Result{
+			Status:  "error",
+			Message: "request body must only contain a single JSON object {}",
+		}
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(r)
+		return
+	}
+
 	// validate the struct
-	err := validate.Struct(u)
+	err = validate.Struct(u)
 	if err != nil {
 		r := models.Result{
 			Status:  "validation error",
@@ -192,13 +205,27 @@ func (uc UserController) UpdateUser(w http.ResponseWriter, r *http.Request) {
 
 	u := models.User{}
 
-	if err := helpers.JSONDecoder(r.Body, w, &u); err != nil {
+	d, err := helpers.JSONDecoder(r.Body, w, &u)
+
+	if err != nil {
 		msg, err := helpers.JSONValidator(err)
 		r := models.Result{
 			Status:  "error",
 			Message: msg,
 		}
 		w.WriteHeader(err)
+		json.NewEncoder(w).Encode(r)
+		return
+	}
+
+	// validate for single object json {}
+	err = d.Decode(&struct{}{})
+	if err != io.EOF {
+		r := models.Result{
+			Status:  "error",
+			Message: "request body must only contain a single JSON object {}",
+		}
+		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(r)
 		return
 	}
@@ -241,7 +268,7 @@ func (uc UserController) UpdateUser(w http.ResponseWriter, r *http.Request) {
 		Upsert: &upsert,
 	}
 
-	_, err := collection.UpdateOne(ctx, filter, bson.D{{Key: "$set", Value: uu}}, &opts)
+	_, err = collection.UpdateOne(ctx, filter, bson.D{{Key: "$set", Value: uu}}, &opts)
 	if err != nil {
 		r := models.Result{
 			Status:  "error",

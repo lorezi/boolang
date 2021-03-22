@@ -11,12 +11,13 @@ import (
 )
 
 // JsonDecoder to check req payload size, check unknown fields and decode req
-func JSONDecoder(r io.ReadCloser, w http.ResponseWriter, m interface{}) error {
+func JSONDecoder(r io.ReadCloser, w http.ResponseWriter, m interface{}) (*json.Decoder, error) {
 	r = http.MaxBytesReader(w, r, 1048576)
 	d := json.NewDecoder(r)
 	d.DisallowUnknownFields()
 	err := d.Decode(m)
-	return err
+
+	return d, err
 }
 
 // JSONValidator to validate json request payload 👁👁👀
@@ -46,4 +47,5 @@ func JSONValidator(err error) (string, int) {
 		return "invalid request payload", http.StatusInternalServerError
 
 	}
+
 }
