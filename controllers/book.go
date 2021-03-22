@@ -62,7 +62,7 @@ func (bc BookController) HomePage(w http.ResponseWriter, r *http.Request) {
 func (bc BookController) GetBooks(w http.ResponseWriter, r *http.Request) {
 
 	// book := models.BookResult{}
-	books := []models.BookResult{}
+	books := []models.Book{}
 	limit, err := strconv.ParseInt(r.URL.Query().Get("limit"), 10, 64)
 	inits.LogFatal(err)
 	page, err := strconv.ParseInt(r.URL.Query().Get("page"), 10, 64)
@@ -79,7 +79,7 @@ func (bc BookController) GetBooks(w http.ResponseWriter, r *http.Request) {
 	inits.LogFatal(err)
 
 	for _, v := range res.Data {
-		var book *models.BookResult
+		var book *models.Book
 
 		if err := bson.Unmarshal(v, &book); err == nil {
 
@@ -158,7 +158,10 @@ func (bc BookController) AddBook(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(context.Background(), 100*time.Second)
 	defer cancel()
 
-	res, err := collection.InsertOne(ctx, b)
+	b.ID = primitive.NewObjectID()
+	b.BookID = b.ID.Hex()
+
+	_, err := collection.InsertOne(ctx, b)
 	if err != nil {
 		r := models.Result{
 			Status:  "fail",
@@ -171,16 +174,16 @@ func (bc BookController) AddBook(w http.ResponseWriter, r *http.Request) {
 	// id := res.InsertedID
 
 	// converts primitive objectID type to string
-	id := res.InsertedID.(primitive.ObjectID).Hex()
+	// id := res.InsertedID.(primitive.ObjectID).Hex()
 
-	nb := models.BookResult{
-		ID:   id,
-		Book: b,
+	msg := models.Result{
+		Status:  "success",
+		Message: "book created successfully",
 	}
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(nb)
+	json.NewEncoder(w).Encode(msg)
 
 }
 
