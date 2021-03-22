@@ -9,7 +9,8 @@ type BookResult struct {
 
 // Book model for creating new book
 type Book struct {
-	Title  string `json:"title,omitempty" bson:"title"`
-	Author string `json:"author,omitempty" bson:"author"`
-	Year   string `json:"year,omitempty" bson:"year"`
+	Title      string     `json:"title,omitempty" bson:"title"`
+	Author     string     `json:"author,omitempty" bson:"author"`
+	Year       string     `json:"year,omitempty" bson:"year"`
+	Permission Permission `json:"permission" bson:"permission"`
 }

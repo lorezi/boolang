@@ -158,6 +158,7 @@ func (bc BookController) AddBook(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
+	b.Permission.UUID = primitive.NewObjectID().Hex()
 	res, err := collection.InsertOne(ctx, b)
 	if err != nil {
 		r := models.Result{
