@@ -57,7 +57,9 @@ func main() {
 	r.PathPrefix("/documentation/").Handler(httpSwagger.WrapHandler)
 
 	// no auth routes for testing
+	r.HandleFunc("/permissions/{id}", pc.GetPermission).Methods("GET")
 	r.HandleFunc("/permissions", pc.CreatePermission).Methods("POST")
+	r.HandleFunc("/permissions", pc.GetPermissions).Methods("GET")
 
 	handler := cors.Default().Handler(r)
 	srv := &http.Server{

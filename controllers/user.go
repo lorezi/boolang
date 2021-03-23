@@ -260,6 +260,10 @@ func (uc UserController) UpdateUser(w http.ResponseWriter, r *http.Request) {
 		uu = append(uu, bson.E{Key: "address", Value: u.Address})
 	}
 
+	if u.PermissionGroup != "" {
+		uu = append(uu, bson.E{Key: "permission_group_id", Value: u.PermissionGroup})
+	}
+
 	u.UpdatedAt, _ = time.Parse(time.RFC3339, time.Now().Format(time.RFC3339))
 	uu = append(uu, bson.E{Key: "updated_at", Value: u.UpdatedAt})
 
