@@ -36,6 +36,7 @@ func main() {
 	r := mux.NewRouter()
 	bc := controllers.NewBookController()
 	uc := controllers.NewUserController()
+	pc := controllers.NewPermissionController()
 
 	subr := r.PathPrefix("/api/v1").Subrouter()
 	subr.Use(middleware.Authentication)
@@ -54,6 +55,9 @@ func main() {
 	r.HandleFunc("/users/login", uc.Login).Methods("POST")
 	r.HandleFunc("/users/signup", uc.CreateUser).Methods("POST")
 	r.PathPrefix("/documentation/").Handler(httpSwagger.WrapHandler)
+
+	// no auth routes for testing
+	r.HandleFunc("/permissions", pc.CreatePermission).Methods("POST")
 
 	handler := cors.Default().Handler(r)
 	srv := &http.Server{
