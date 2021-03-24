@@ -3,6 +3,7 @@ package controllers
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"strconv"
@@ -97,7 +98,7 @@ func (uc UserController) GetUsers(w http.ResponseWriter, r *http.Request) {
 func (uc UserController) GetUser(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	u := models.User{}
+	u := []models.UserRead{}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
@@ -105,13 +106,41 @@ func (uc UserController) GetUser(w http.ResponseWriter, r *http.Request) {
 	c := m.Database("boolang").Collection("users")
 
 	p := mux.Vars(r)
-	f := bson.M{"user_id": p["id"]}
+	// f := bson.M{"user_id": p["id"]}
 
-	err := c.FindOne(ctx, f).Decode(&u)
+	q := []bson.M{
+		{
+			"$match": bson.M{
+				"user_id": p["id"],
+			},
+		},
+		{
+			"$lookup": bson.M{
+				"from":         "permissions",
+				"localField":   "permission_group_id",
+				"foreignField": "group_id",
+				"as":           "permissions",
+			},
+		},
+	}
+
+	cur, err := c.Aggregate(ctx, q)
 	if err != nil {
 		r := models.Result{
 			Status:  "error",
-			Message: "user does not exist",
+			Message: err.Error(),
+		}
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(r)
+		return
+	}
+
+	fmt.Println(cur)
+	err = cur.All(ctx, &u)
+	if err != nil {
+		r := models.Result{
+			Status:  "error",
+			Message: err.Error(),
 		}
 		w.WriteHeader(http.StatusInternalServerError)
 		json.NewEncoder(w).Encode(r)
@@ -119,7 +148,7 @@ func (uc UserController) GetUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(u)
+	json.NewEncoder(w).Encode(u[0])
 
 }
 
