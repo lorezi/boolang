@@ -3,6 +3,7 @@ package controllers
 import (
 	"context"
 	"encoding/json"
+	"log"
 	"net/http"
 	"strconv"
 	"time"
@@ -65,6 +66,28 @@ func (pc PermissionController) GetPermissions(w http.ResponseWriter, r *http.Req
 
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(ps)
+}
+
+func GetPermission(path string) models.PermissionGroup {
+
+	p := models.PermissionGroup{}
+
+	filter := bson.M{"group_id": path}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+
+	c := m.Database("boolang").Collection("permissions")
+
+	err := c.FindOne(ctx, filter).Decode(&p)
+	if err != nil {
+		log.Panic(err)
+
+	}
+
+	// w.WriteHeader(http.StatusOK)
+	// json.NewEncoder(w).Encode(p)
+	return p
 }
 
 func (pc PermissionController) GetPermission(w http.ResponseWriter, r *http.Request) {

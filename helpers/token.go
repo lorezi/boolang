@@ -24,13 +24,38 @@ func init() {
 	mt = inits.NewDB().MongoConn()
 }
 
+func getPermission(path string) models.PermissionGroup {
+
+	p := models.PermissionGroup{}
+
+	filter := bson.M{"group_id": path}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+
+	c := mt.Database("boolang").Collection("permissions")
+
+	err := c.FindOne(ctx, filter).Decode(&p)
+	if err != nil {
+		log.Panic(err)
+
+	}
+
+	// w.WriteHeader(http.StatusOK)
+	// json.NewEncoder(w).Encode(p)
+	return p
+}
+
 //GenerateAllTokens generate both the detailed token and refresh token
-func GenerateAllTokens(email string, firstName string, lastName, uid string) (string, string, error) {
+func GenerateAllTokens(email string, firstName string, lastName string, uid string, permission string) (string, string, error) {
+
+	res := getPermission(permission)
 	claims := &models.SignedDetails{
-		Email:     email,
-		FirstName: firstName,
-		LastName:  lastName,
-		UID:       uid,
+		Email:       email,
+		FirstName:   firstName,
+		LastName:    lastName,
+		UID:         uid,
+		Permissions: res,
 		StandardClaims: jwt.StandardClaims{
 			// duration 1day
 			ExpiresAt: time.Now().Add(time.Hour * time.Duration(24)).Unix(),
@@ -61,6 +86,7 @@ func GenerateAllTokens(email string, firstName string, lastName, uid string) (st
 
 // ValidateToken validates the jwt token
 func ValidateToken(signedToken string) (claims *models.SignedDetails, msg string) {
+
 	token, err := jwt.ParseWithClaims(
 		signedToken,
 		&models.SignedDetails{},
@@ -84,8 +110,16 @@ func ValidateToken(signedToken string) (claims *models.SignedDetails, msg string
 		msg = err.Error()
 		return
 	}
+
 	return claims, msg
 }
+
+// Authorization models.models.PermissionGroup
+// func Authorize(*models.SignedDetails) {
+
+// 	xs := strings.Split(claims)
+
+// }
 
 // UpdateAllTokens renew the user tokens when they login
 func UpdateAllTokens(signedToken string, signedRefreshToken string, userId string) {

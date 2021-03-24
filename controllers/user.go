@@ -207,8 +207,9 @@ func (uc UserController) CreateUser(w http.ResponseWriter, r *http.Request) {
 	u.ID = primitive.NewObjectID()
 	u.UserID = u.ID.Hex()
 
-	tk, rtk, _ := helpers.GenerateAllTokens(u.Email, u.FirstName, u.LastName, u.UserID)
+	// tk, rtk, _ := helpers.GenerateAllTokens(u.Email, u.FirstName, u.LastName, u.UserID, u.PermissionGroup)
 
+	tk, rtk, _ := helpers.GenerateAllTokens(u.Email, u.FirstName, u.LastName, u.UserID, u.PermissionGroup)
 	u.Token = tk
 	u.RefreshToken = rtk
 
@@ -372,7 +373,7 @@ func (uc UserController) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	tk, rtk, _ := helpers.GenerateAllTokens(u.Email, u.FirstName, u.LastName, u.UserID)
+	tk, rtk, _ := helpers.GenerateAllTokens(u.Email, u.FirstName, u.LastName, u.UserID, u.PermissionGroup)
 	helpers.UpdateAllTokens(tk, rtk, u.UserID)
 
 	w.WriteHeader(http.StatusOK)

@@ -11,7 +11,6 @@ require (
 	github.com/go-playground/validator v9.31.0+incompatible
 	github.com/gobeam/mongo-go-pagination v0.0.4
 	github.com/golang/snappy v0.0.3 // indirect
-	github.com/google/uuid v1.2.0
 	github.com/gorilla/mux v1.8.0
 	github.com/klauspost/compress v1.11.12 // indirect
 	github.com/leodido/go-urn v1.2.0 // indirect

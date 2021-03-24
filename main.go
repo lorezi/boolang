@@ -39,7 +39,8 @@ func main() {
 	pc := controllers.NewPermissionController()
 
 	subr := r.PathPrefix("/api/v1").Subrouter()
-	subr.Use(middleware.Authentication)
+
+	subr.Use(middleware.Authentication, middleware.Authorization)
 
 	subr.HandleFunc("/home", bc.HomePage).Methods("GET")
 	subr.HandleFunc("/books", bc.GetBooks).Methods("GET").Queries("limit", "{limit:[0-9]+}", "page", "{page:[0-9]+}")
