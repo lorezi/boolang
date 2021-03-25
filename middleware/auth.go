@@ -3,7 +3,6 @@ package middleware
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"strings"
 
@@ -19,12 +18,12 @@ type Privileges struct {
 	Delete bool
 }
 
-func taxAuthorization(p models.PermissionGroup, w http.ResponseWriter, r *http.Request) Privileges {
+func bookAuthorization(p models.PermissionGroup, w http.ResponseWriter, r *http.Request) Privileges {
 
 	roles := &Privileges{Role: false, Create: false, Read: false, Update: false, Delete: false}
 
 	for _, v := range p.Permission {
-		if v.Role == "tax" {
+		if v.Role == "book" {
 			roles.Role = true
 			for _, v := range v.Actions {
 				if v.Create {
@@ -47,31 +46,120 @@ func taxAuthorization(p models.PermissionGroup, w http.ResponseWriter, r *http.R
 
 }
 
-func Authorization(next http.Handler) http.Handler {
+func permissionAuthorization(p models.PermissionGroup, w http.ResponseWriter, r *http.Request) Privileges {
+
+	roles := &Privileges{Role: false, Create: false, Read: false, Update: false, Delete: false}
+
+	for _, v := range p.Permission {
+		if v.Role == "permission" {
+			roles.Role = true
+			for _, v := range v.Actions {
+				if v.Create {
+					roles.Create = true
+				}
+				if v.Read {
+					roles.Read = true
+				}
+				if v.Update {
+					roles.Update = true
+				}
+				if v.Delete {
+					roles.Delete = true
+				}
+			}
+		}
+	}
+
+	return *roles
+
+}
+
+func userAuthorization(p models.PermissionGroup, w http.ResponseWriter, r *http.Request) Privileges {
+
+	roles := &Privileges{Role: false, Create: false, Read: false, Update: false, Delete: false}
+
+	for _, v := range p.Permission {
+		if v.Role == "user" {
+			roles.Role = true
+			for _, v := range v.Actions {
+				if v.Create {
+					roles.Create = true
+				}
+				if v.Read {
+					roles.Read = true
+				}
+				if v.Update {
+					roles.Update = true
+				}
+				if v.Delete {
+					roles.Delete = true
+				}
+			}
+		}
+	}
+
+	return *roles
+
+}
+
+func BookAuthorization(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 		permissions := ctx.Value("permissions").(models.PermissionGroup)
-		fmt.Println(permissions)
 
 		// business logic
-		tr := taxAuthorization(permissions, w, r)
-		fmt.Println(tr)
+		br := bookAuthorization(permissions, w, r)
 
-		if tr.Role {
+		if br.Role {
 			next.ServeHTTP(w, r)
 			return
 		}
 
-		// pr := payAuthorization(permissions, w, r)
-		// _, ok = pr["role"]
-		// _, found = pr["create"]
+		msg := models.Result{
+			Status:  "Authorization failure",
+			Message: "Contact admin 😰😰😰",
+		}
+		w.WriteHeader(http.StatusForbidden)
+		json.NewEncoder(w).Encode(msg)
 
-		// if ok && found {
-		// 	next.ServeHTTP(w, r)
-		// 	return
-		// }
+	})
+}
 
-		// fmt.Println(tr)
+func PermissionAuthorization(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
+		permissions := ctx.Value("permissions").(models.PermissionGroup)
+
+		// business logic
+		pr := permissionAuthorization(permissions, w, r)
+
+		if pr.Role {
+			next.ServeHTTP(w, r)
+			return
+		}
+
+		msg := models.Result{
+			Status:  "Authorization failure",
+			Message: "Contact admin 😰😰😰",
+		}
+		w.WriteHeader(http.StatusForbidden)
+		json.NewEncoder(w).Encode(msg)
+
+	})
+}
+
+func UserAuthorization(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
+		permissions := ctx.Value("permissions").(models.PermissionGroup)
+
+		// business logic
+		ur := userAuthorization(permissions, w, r)
+
+		if ur.Role {
+			next.ServeHTTP(w, r)
+			return
+		}
 
 		msg := models.Result{
 			Status:  "Authorization failure",

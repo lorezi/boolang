@@ -3,7 +3,6 @@ package helpers
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"os"
 	"time"
@@ -38,7 +37,7 @@ func getPermission(path string) models.PermissionGroup {
 
 	err := c.FindOne(ctx, filter).Decode(&p)
 	if err != nil {
-		fmt.Println(err)
+
 		log.Panic(err)
 
 	}
@@ -52,7 +51,7 @@ func getPermission(path string) models.PermissionGroup {
 func GenerateAllTokens(email string, firstName string, lastName string, uid string, permission string) (string, string, error) {
 
 	res := getPermission(permission)
-	fmt.Println(res)
+
 	claims := &models.SignedDetails{
 		Email:       email,
 		FirstName:   firstName,
@@ -117,13 +116,6 @@ func ValidateToken(signedToken string) (claims *models.SignedDetails, msg string
 
 	return claims, msg
 }
-
-// Authorization models.models.PermissionGroup
-// func Authorize(*models.SignedDetails) {
-
-// 	xs := strings.Split(claims)
-
-// }
 
 // UpdateAllTokens renew the user tokens when they login
 func UpdateAllTokens(signedToken string, signedRefreshToken string, userId string) {

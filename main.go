@@ -39,28 +39,39 @@ func main() {
 	pc := controllers.NewPermissionController()
 
 	subr := r.PathPrefix("/api/v1").Subrouter()
+	subr.Use(middleware.Authentication)
 
-	subr.Use(middleware.Authentication, middleware.Authorization)
+	// book protected routes
+	bkr := subr.PathPrefix("/api-books").Subrouter()
+	bkr.Use(middleware.BookAuthorization)
 
-	subr.HandleFunc("/home", bc.HomePage).Methods("GET")
-	subr.HandleFunc("/books", bc.GetBooks).Methods("GET").Queries("limit", "{limit:[0-9]+}", "page", "{page:[0-9]+}")
-	subr.HandleFunc("/books/{id}", bc.GetBook).Methods("GET")
-	subr.HandleFunc("/books", bc.AddBook).Methods("POST")
-	subr.HandleFunc("/books/{id}", bc.UpdateBook).Methods("PATCH")
-	subr.HandleFunc("/books/{id}", bc.DeleteBook).Methods("DELETE")
+	bkr.HandleFunc("/home", bc.HomePage).Methods("GET")
+	bkr.HandleFunc("/books", bc.GetBooks).Methods("GET").Queries("limit", "{limit:[0-9]+}", "page", "{page:[0-9]+}")
+	bkr.HandleFunc("/books/{id}", bc.GetBook).Methods("GET")
+	bkr.HandleFunc("/books", bc.AddBook).Methods("POST")
+	bkr.HandleFunc("/books/{id}", bc.UpdateBook).Methods("PATCH")
+	bkr.HandleFunc("/books/{id}", bc.DeleteBook).Methods("DELETE")
 
-	subr.HandleFunc("/users/{id}", uc.GetUser).Methods("GET")
-	subr.HandleFunc("/users/{id}", uc.UpdateUser).Methods("PATCH")
-	subr.HandleFunc("/users", uc.GetUsers).Methods("GET").Queries("limit", "{limit:[0-9]+}", "page", "{page:[0-9]+}")
+	// user protected routes
+	ur := subr.PathPrefix("/api-users").Subrouter()
+	ur.Use(middleware.UserAuthorization)
 
+	ur.HandleFunc("/users/{id}", uc.GetUser).Methods("GET")
+	ur.HandleFunc("/users/{id}", uc.UpdateUser).Methods("PATCH")
+	ur.HandleFunc("/users", uc.GetUsers).Methods("GET").Queries("limit", "{limit:[0-9]+}", "page", "{page:[0-9]+}")
+
+	// unprotected routes
 	r.HandleFunc("/users/login", uc.Login).Methods("POST")
 	r.HandleFunc("/users/signup", uc.CreateUser).Methods("POST")
 	r.PathPrefix("/documentation/").Handler(httpSwagger.WrapHandler)
 
 	// no auth routes for testing
-	r.HandleFunc("/permissions/{id}", pc.GetPermission).Methods("GET")
-	r.HandleFunc("/permissions", pc.CreatePermission).Methods("POST")
-	r.HandleFunc("/permissions", pc.GetPermissions).Methods("GET")
+	// permission protected routes
+	pr := subr.PathPrefix("/api-permissions").Subrouter()
+	pr.Use(middleware.PermissionAuthorization)
+	pr.HandleFunc("/permissions/{id}", pc.GetPermission).Methods("GET")
+	pr.HandleFunc("/permissions", pc.CreatePermission).Methods("POST")
+	pr.HandleFunc("/permissions", pc.GetPermissions).Methods("GET")
 
 	handler := cors.Default().Handler(r)
 	srv := &http.Server{
