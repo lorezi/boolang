@@ -11,42 +11,39 @@ import (
 	"github.com/lorezi/boolang/models"
 )
 
-// type Privileges struct {
-// 	Role   bool
-// 	Create bool
-// 	Read   bool
-// 	Update bool
-// 	Delete bool
-// }
+type Privileges struct {
+	Role   bool
+	Create bool
+	Read   bool
+	Update bool
+	Delete bool
+}
 
-func taxAuthorization(p models.PermissionGroup, w http.ResponseWriter, r *http.Request) map[string]bool {
+func taxAuthorization(p models.PermissionGroup, w http.ResponseWriter, r *http.Request) Privileges {
 
-	// var roles = Privileges{Role: false, Create: false, Read: false, Update: false, Delete: false}
-	roles := make(map[string]bool, 5)
+	roles := &Privileges{Role: false, Create: false, Read: false, Update: false, Delete: false}
 
 	for _, v := range p.Permission {
 		if v.Role == "tax" {
-			roles["role"] = true
+			roles.Role = true
 			for _, v := range v.Actions {
 				if v.Create {
-					roles["create"] = true
-
+					roles.Create = true
 				}
 				if v.Read {
-					roles["read"] = true
+					roles.Read = true
 				}
 				if v.Update {
-					roles["update"] = true
+					roles.Update = true
 				}
 				if v.Delete {
-					roles["delete"] = true
+					roles.Delete = true
 				}
 			}
-			return roles
 		}
 	}
 
-	return roles
+	return *roles
 
 }
 
@@ -58,9 +55,9 @@ func Authorization(next http.Handler) http.Handler {
 
 		// business logic
 		tr := taxAuthorization(permissions, w, r)
-		_, ok := tr["role"]
-		_, found := tr["create"]
-		if ok && found {
+		fmt.Println(tr)
+
+		if tr.Role {
 			next.ServeHTTP(w, r)
 			return
 		}
@@ -85,12 +82,6 @@ func Authorization(next http.Handler) http.Handler {
 
 	})
 }
-
-// for k, v := range p {
-// 	fmt.Printf("key: %v  value: %v", k, v)
-// }
-// xs := strings.Split(tk, ".")
-// u := strings.TrimSpace(xs[1])
 
 // Auth validate token and authorize users
 

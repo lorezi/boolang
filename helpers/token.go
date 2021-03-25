@@ -3,6 +3,7 @@ package helpers
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"os"
 	"time"
@@ -37,6 +38,7 @@ func getPermission(path string) models.PermissionGroup {
 
 	err := c.FindOne(ctx, filter).Decode(&p)
 	if err != nil {
+		fmt.Println(err)
 		log.Panic(err)
 
 	}
@@ -50,6 +52,7 @@ func getPermission(path string) models.PermissionGroup {
 func GenerateAllTokens(email string, firstName string, lastName string, uid string, permission string) (string, string, error) {
 
 	res := getPermission(permission)
+	fmt.Println(res)
 	claims := &models.SignedDetails{
 		Email:       email,
 		FirstName:   firstName,
@@ -63,6 +66,7 @@ func GenerateAllTokens(email string, firstName string, lastName string, uid stri
 	}
 
 	refreshClaims := &models.SignedDetails{
+		Permissions: res,
 		StandardClaims: jwt.StandardClaims{
 			// duration 7days
 			ExpiresAt: time.Now().Local().Add(time.Hour * time.Duration(168)).Unix(),
