@@ -2,4 +2,5 @@
 server
 Makefile
 /tmp
+/vendor
 features.txt

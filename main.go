@@ -43,14 +43,12 @@ func main() {
 	subr := r.PathPrefix("/api/v1").Subrouter()
 	subr.Use(middleware.Authentication)
 
+	subr.Handle("/home", handlers.LoggingHandler(os.Stdout, http.HandlerFunc(bc.HomePage))).Methods("GET")
+
 	// book protected routes
 	bkr := subr.PathPrefix("/api-books").Subrouter()
 	bkr.Use(middleware.BookAuthorization)
-
 	// bkr.HandleFunc("/home",  bc.HomePage).Methods("GET")
-
-	subr.Handle("/home", handlers.LoggingHandler(os.Stdout, http.HandlerFunc(bc.HomePage))).Methods("GET")
-
 	bkr.HandleFunc("/books", bc.GetBooks).Methods("GET").Queries("limit", "{limit:[0-9]+}", "page", "{page:[0-9]+}")
 	bkr.HandleFunc("/books/{id}", bc.GetBook).Methods("GET")
 	bkr.HandleFunc("/books", bc.AddBook).Methods("POST")
