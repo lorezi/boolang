@@ -1,6 +1,5 @@
 .env
-server
-Makefile
+boolang
 /tmp
 /vendor
 features.txt
