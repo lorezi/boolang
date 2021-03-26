@@ -49,7 +49,7 @@ func main() {
 
 	// bkr.HandleFunc("/home",  bc.HomePage).Methods("GET")
 
-	r.Handle("/home", handlers.LoggingHandler(os.Stdout, http.HandlerFunc(bc.HomePage))).Methods("GET")
+	subr.Handle("/home", handlers.LoggingHandler(os.Stdout, http.HandlerFunc(bc.HomePage))).Methods("GET")
 
 	bkr.HandleFunc("/books", bc.GetBooks).Methods("GET").Queries("limit", "{limit:[0-9]+}", "page", "{page:[0-9]+}")
 	bkr.HandleFunc("/books/{id}", bc.GetBook).Methods("GET")
