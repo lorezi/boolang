@@ -3,8 +3,10 @@ package main
 import (
 	"log"
 	"net/http"
+	"os"
 	"time"
 
+	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	"github.com/rs/cors"
 
@@ -45,7 +47,10 @@ func main() {
 	bkr := subr.PathPrefix("/api-books").Subrouter()
 	bkr.Use(middleware.BookAuthorization)
 
-	bkr.HandleFunc("/home", bc.HomePage).Methods("GET")
+	// bkr.HandleFunc("/home",  bc.HomePage).Methods("GET")
+
+	r.Handle("/home", handlers.LoggingHandler(os.Stdout, http.HandlerFunc(bc.HomePage))).Methods("GET")
+
 	bkr.HandleFunc("/books", bc.GetBooks).Methods("GET").Queries("limit", "{limit:[0-9]+}", "page", "{page:[0-9]+}")
 	bkr.HandleFunc("/books/{id}", bc.GetBook).Methods("GET")
 	bkr.HandleFunc("/books", bc.AddBook).Methods("POST")
