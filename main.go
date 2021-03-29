@@ -41,12 +41,12 @@ func main() {
 	pc := controllers.NewPermissionController()
 
 	subr := r.PathPrefix("/api").Subrouter()
-	subr.Use(middleware.Authentication)
 
-	subr.Handle("/home", handlers.LoggingHandler(os.Stdout, http.HandlerFunc(bc.HomePage))).Methods("GET")
+	authr := subr.PathPrefix("/auth").Subrouter()
+	authr.Use(middleware.Authentication)
 
 	// book protected routes
-	bkr := subr.PathPrefix("/api-books").Subrouter()
+	bkr := authr.PathPrefix("/api-books").Subrouter()
 	bkr.Use(middleware.BookAuthorization)
 	// bkr.HandleFunc("/home",  bc.HomePage).Methods("GET")
 	bkr.HandleFunc("/books", bc.GetBooks).Methods("GET").Queries("limit", "{limit:[0-9]+}", "page", "{page:[0-9]+}")
@@ -56,25 +56,25 @@ func main() {
 	bkr.HandleFunc("/books/{id}", bc.DeleteBook).Methods("DELETE")
 
 	// user protected routes
-	ur := subr.PathPrefix("/api-users").Subrouter()
+	ur := authr.PathPrefix("/api-users").Subrouter()
 	ur.Use(middleware.UserAuthorization)
 
 	ur.HandleFunc("/users/{id}", uc.GetUser).Methods("GET")
 	ur.HandleFunc("/users/{id}", uc.UpdateUser).Methods("PATCH")
 	ur.HandleFunc("/users", uc.GetUsers).Methods("GET").Queries("limit", "{limit:[0-9]+}", "page", "{page:[0-9]+}")
 
-	// unprotected routes
-	r.HandleFunc("/users/login", uc.Login).Methods("POST")
-	r.HandleFunc("/users/signup", uc.CreateUser).Methods("POST")
-	r.PathPrefix("/documentation/").Handler(httpSwagger.WrapHandler)
-
-	// no auth routes for testing
 	// permission protected routes
-	pr := subr.PathPrefix("/api-permissions").Subrouter()
+	pr := authr.PathPrefix("/api-permissions").Subrouter()
 	pr.Use(middleware.PermissionAuthorization)
 	pr.HandleFunc("/permissions/{id}", pc.GetPermission).Methods("GET")
 	pr.HandleFunc("/permissions", pc.CreatePermission).Methods("POST")
 	pr.HandleFunc("/permissions", pc.GetPermissions).Methods("GET")
+
+	// unprotected routes
+	subr.HandleFunc("/users/login", uc.Login).Methods("POST")
+	subr.HandleFunc("/users/signup", uc.CreateUser).Methods("POST")
+	subr.PathPrefix("/documentation/").Handler(httpSwagger.WrapHandler)
+	subr.Handle("/home", handlers.LoggingHandler(os.Stdout, http.HandlerFunc(bc.HomePage))).Methods("GET")
 
 	handler := cors.Default().Handler(r)
 	srv := &http.Server{
