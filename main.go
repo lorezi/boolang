@@ -40,7 +40,7 @@ func main() {
 	uc := controllers.NewUserController()
 	pc := controllers.NewPermissionController()
 
-	subr := r.PathPrefix("/api/v1").Subrouter()
+	subr := r.PathPrefix("/api").Subrouter()
 	subr.Use(middleware.Authentication)
 
 	subr.Handle("/home", handlers.LoggingHandler(os.Stdout, http.HandlerFunc(bc.HomePage))).Methods("GET")
@@ -79,7 +79,7 @@ func main() {
 	handler := cors.Default().Handler(r)
 	srv := &http.Server{
 		Handler:      handler,
-		Addr:         ":8080",
+		Addr:         ":3000",
 		WriteTimeout: 15 * time.Second,
 		ReadTimeout:  15 * time.Second,
 	}

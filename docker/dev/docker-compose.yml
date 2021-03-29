@@ -1,0 +1,22 @@
+version: "3"
+
+services:
+  # golang web service
+  boolang:
+    build:
+      context: ../../
+      dockerfile: docker/dev/go/Dockerfile
+    container_name: boolang
+    ports:
+      - "3000:3000"
+
+  # nginx service
+  nginx:
+    image: nginx:1.12
+    container_name: nginx-boolang
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/app.conf:/etc/nginx/conf.d/nginx.conf
+    depends_on:
+      - boolang

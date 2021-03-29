@@ -1,12 +1,17 @@
 # Build stage
 FROM golang:1.15.10-alpine3.12 AS builder
 
+
 COPY ${PWD} /app
 WORKDIR /app
 
+
 # Toggle CGO based on your app requeirment. CGO_ENABLED=1 for enabling CGO
 
-RUN CGO_ENABLED=0 go build -ldflags '-s -w -extldflags "-static"' -o /app/appbin *.go
+RUN CGO_ENABLED=1 go build -ldflags '-s -w -extldflags "-static"' -o /app/appbin -x *.go
+# RUN CGO_ENABLED=0 go build -ldflags "-s -w" -o bin/boolang  *.go
+
+
 
 
 
