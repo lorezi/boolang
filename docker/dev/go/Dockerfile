@@ -33,7 +33,7 @@ WORKDIR /home/appuser/app
 
 # Since running as non-root user, port bindings < 1024 in not possible
 # 8000 for HTTP; 8443 for HTTPS;
-EXPOSE 8080
+EXPOSE 3000
 EXPOSE 8443
 
 CMD [ "./appbin" ]

@@ -56,6 +56,17 @@ docker-build: build
 docker-push: docker-build
 	docker push ${REGISTRY}/${ENV}/${APP}:${COMMIT_SHA}
 
+.PHONY: docker-compose-up
+## docker-compose-up: to spin up multiple services
+docker-compose-up:
+	docker-compose -f docker/dev/docker-compose.yml up --build
+
+.PHONY: docker-compose-down
+## docker-compose-down: to stop and remove unwanted image builds
+docker-compose-down:
+	docker-compose -f docker/dev/docker-compose.yml down
+	docker system prune --volumes --force
+
 
 
 .PHONY: help
