@@ -1,18 +1,24 @@
-# Boolang - Golang
+# Boolang - Cloud Native Go App
 
-Boolang is a basic CRUD RESTful API built with Golang and Postgres.
+Boolang is a goto project for Cloud Native Golang Application
 
-## Installation
+## Features
 
-[pq](https://github.com/lib/pq)
+The project includes the following features:
 
-[mux](https://github.com/gorilla/mux)
-
-[gotenv](https://github.com/subosito/gotenv)
-
-```bash
-go get github.com/lib/pq
-```
+- JWT For Authentication [jwt](github.com/dgrijalva/jwt-go)
+- Gorilla/Mux Router [mux](https://github.com/gorilla/mux)
+- Authentication & Authorization Middleware
+- A Mongo Database [mongo](go.mongodb.org/mongo-driver)
+- Validation Using [Validator v10](https://github.com/go-playground/validator)
+- Register / Login / Routes
+- Configuration With Environment Variables
+  [gotenv](https://github.com/subosito/gotenv)
+- Swagger documentation [swagger](https://github.com/swaggo/swag)
+- Docker
+- Nginx for reverse proxy
+- Grafana
+- Prometheus
 
 ## Contributing
 

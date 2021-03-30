@@ -56,6 +56,9 @@ func main() {
 
 	subr.HandleFunc("/balances", mc.Handle)
 
+	// create a middleware for monitoring
+	subr.Use(middleware.Monitoring)
+
 	authr := subr.PathPrefix("/auth").Subrouter()
 	authr.Use(middleware.Authentication)
 
