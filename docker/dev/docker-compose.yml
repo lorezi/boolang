@@ -8,15 +8,34 @@ services:
       dockerfile: docker/dev/go/Dockerfile
     container_name: boolang
     ports:
-      - "3000:3000"
+      - "8080:8080"
 
   # nginx service
-  nginx:
-    image: nginx:1.12
-    container_name: nginx-boolang
+  # nginx:
+  #   image: nginx:1.12
+  #   container_name: nginx-boolang
+  #   ports:
+  #     - "80:80"
+  #   volumes:
+  #     - ./nginx/app.conf:/etc/nginx/conf.d/nginx.conf
+  #   depends_on:
+  #     - boolang
+
+  # prometheus service
+  prometheus:
+    image: "prom/prometheus:v2.21.0"
     ports:
-      - "80:80"
+      - "9090:9090"
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+
     volumes:
-      - ./nginx/app.conf:/etc/nginx/conf.d/nginx.conf
-    depends_on:
-      - boolang
+      - "./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro"
+
+  # grafana service
+  grafana:
+    image: "grafana/grafana:5.4.3"
+    ports:
+      - "3000:3000"
+    volumes:
+      - ../../tmp/build/grafana:/var/lib/grafana:cached

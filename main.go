@@ -12,6 +12,8 @@ import (
 
 	"github.com/lorezi/boolang/controllers"
 	"github.com/lorezi/boolang/middleware"
+	"github.com/lorezi/boolang/pkg/metric"
+	"github.com/lorezi/boolang/pkg/prometheus"
 
 	httpSwagger "github.com/swaggo/http-swagger"
 
@@ -36,11 +38,23 @@ import (
 func main() {
 
 	r := mux.NewRouter()
+	// Prometheus
+	pro := prometheus.New(true)
+	// metric
+	mtr := metric.New(pro.Registry())
+	// prometheus metric routes
+	r.HandleFunc("/metrics", pro.Handler())
+
 	bc := controllers.NewBookController()
 	uc := controllers.NewUserController()
 	pc := controllers.NewPermissionController()
 
+	// metric controller
+	mc := controllers.NewBalanceUpdate(mtr)
+
 	subr := r.PathPrefix("/api").Subrouter()
+
+	subr.HandleFunc("/balances", mc.Handle)
 
 	authr := subr.PathPrefix("/auth").Subrouter()
 	authr.Use(middleware.Authentication)
@@ -78,8 +92,9 @@ func main() {
 
 	handler := cors.Default().Handler(r)
 	srv := &http.Server{
-		Handler:      handler,
-		Addr:         ":3000",
+		Handler: handler,
+		// Addr:         ":3000",
+		Addr:         ":8080",
 		WriteTimeout: 15 * time.Second,
 		ReadTimeout:  15 * time.Second,
 	}
