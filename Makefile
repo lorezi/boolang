@@ -1,5 +1,5 @@
 APP?=boolang
-REGISTRY?=beastz/boolang
+REGISTRY?=beastz
 COMMIT_SHA=$(shell git rev-parse --short HEAD)
 
 .PHONY: build
@@ -54,7 +54,7 @@ docker-build: build
 .PHONY: docker-push
 ## docker-push: pushes the boolang docker image to registry
 docker-push: docker-build
-	docker push ${REGISTRY}/${ENV}/${APP}:${COMMIT_SHA}
+	docker push ${REGISTRY}/${APP}:${COMMIT_SHA}
 
 .PHONY: docker-compose-up
 ## docker-compose-up: to spin up multiple services
