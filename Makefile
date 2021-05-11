@@ -1,5 +1,5 @@
 APP?=boolang
-REGISTRY?='private-registry'
+REGISTRY?=beastz/boolang
 COMMIT_SHA=$(shell git rev-parse --short HEAD)
 
 .PHONY: build
