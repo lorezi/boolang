@@ -54,7 +54,7 @@ docker-build: build
 .PHONY: docker-push
 ## docker-push: pushes the boolang docker image to registry
 docker-push: docker-build
-	docker push ${REGISTRY}/${APP}:${COMMIT_SHA}
+	docker push ${APP}:${COMMIT_SHA}
 
 .PHONY: docker-compose-up
 ## docker-compose-up: to spin up multiple services
