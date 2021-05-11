@@ -49,12 +49,12 @@ endif
 ## docker-build: builds the boolang docker image to registry
 docker-build: build
 	docker build -f ./docker/dev/go/DockerFile -t ${APP} .
-	docker tag ${APP} ${APP}:${COMMIT_SHA}
+	docker tag ${APP} ${REGISTRY}/${APP}:${COMMIT_SHA}
 
 .PHONY: docker-push
 ## docker-push: pushes the boolang docker image to registry
 docker-push: docker-build
-	docker push ${APP}:${COMMIT_SHA}
+	docker push ${REGISTRY}/${APP}:${COMMIT_SHA}
 
 .PHONY: docker-compose-up
 ## docker-compose-up: to spin up multiple services
