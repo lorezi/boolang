@@ -10,11 +10,11 @@ import (
 
 type User struct {
 	ID              primitive.ObjectID `json:"-" bson:"_id"`
-	FirstName       string             `json:"first_name" bson:"first_name" validate:"required,min=2"`
-	LastName        string             `json:"last_name" bson:"last_name" validate:"required,min=2"`
+	FirstName       string             `json:"first_name" bson:"first_name" validate:"required,min=2,max=25"`
+	LastName        string             `json:"last_name" bson:"last_name" validate:"required,min=2,max=25"`
 	Email           string             `json:"email" bson:"email" validate:"required,email"`
-	Password        string             `json:"password" bson:"password" validate:"required,min=6"`
-	PhoneNo         string             `json:"phone_no" bson:"phone_no" validate:"required,min=11"`
+	Password        string             `json:"password" bson:"password" validate:"required,min=6,max=12"`
+	PhoneNo         string             `json:"phone_no" bson:"phone_no" validate:"required,min=11,max=11"`
 	Address         string             `json:"address" bson:"address" validate:"required"`
 	Token           string             `json:"token" bson:"token"`
 	RefreshToken    string             `json:"refresh_token" bson:"refresh_token"`

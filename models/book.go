@@ -19,5 +19,5 @@ type Book struct {
 	// One to One relationship
 	// Permission Permission `json:"permission" bson:"permission"`
 	// One to Many relationship
-	Permission []Permission `json:"permission" bson:"permission"`
+	// Permission []Permission `json:"permission" bson:"permission"`
 }

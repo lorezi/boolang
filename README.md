@@ -10,7 +10,7 @@ The project includes the following features:
 - Gorilla/Mux Router [mux](https://github.com/gorilla/mux)
 - Authentication & Authorization Middleware
 - A Mongo Database [mongo](go.mongodb.org/mongo-driver)
-- Validation Using [Validator v10](https://github.com/go-playground/validator)
+- Data Validation Using [Validator v10](https://github.com/go-playground/validator)
 - Register / Login / Routes
 - Configuration With Environment Variables
   [gotenv](https://github.com/subosito/gotenv)
