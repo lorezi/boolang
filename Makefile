@@ -48,7 +48,7 @@ endif
 .PHONY: docker-build
 ## docker-build: builds the boolang docker image to registry
 docker-build: build
-	docker build -t ${APP} .
+	docker build -f ./docker/dev/go/DockerFile -t ${APP} .
 	docker tag ${APP} ${APP}:${COMMIT_SHA}
 
 .PHONY: docker-push

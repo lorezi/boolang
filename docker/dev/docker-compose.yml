@@ -5,7 +5,7 @@ services:
   boolang:
     build:
       context: ../../
-      dockerfile: docker/dev/go/Dockerfile
+      dockerfile: docker/dev/go/DockerFile
     container_name: boolang
     ports:
       - "8080:8080"
