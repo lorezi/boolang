@@ -1,0 +1,5 @@
+build:
+  docker:
+    web: docker/dev/go/DockerFile
+run:
+  web: bundle exec puma -C config/puma.rb
