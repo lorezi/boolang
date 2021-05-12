@@ -20,10 +20,12 @@ jobs:
         run: heroku container:login
       - name: Build, Push and Deploy to Heroku
         if: ${{ github.event_name == 'push' }}
-        env:
-          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
-        run: heroku container:push -a ${{ secrets.HEROKU_APP_NAME }} web
-      - name: Release app
-        env:
-          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
-        run: heroku container:release -a ${{ secrets.HEROKU_APP_NAME }} web
+        id: heroku
+        # uses: jctaveras/heroku-deploy@66bad8e81927dbf4a39ef8364a4c2f3043233ce0
+        uses: gonuit/heroku-docker-deploy@v1.3.3
+        with:
+          email: "codebook.ng@gmail.com"
+          heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
+          heroku_app_name: ${{ secrets.HEROKU_APP_NAME }}
+          # dockerfile_path: "docker/dev/go"
+          dockerfile_directory: "docker/dev/go"
