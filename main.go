@@ -90,8 +90,11 @@ func main() {
 	// unprotected routes
 	subr.HandleFunc("/users/login", uc.Login).Methods("POST")
 	subr.HandleFunc("/users/signup", uc.CreateUser).Methods("POST")
-	subr.PathPrefix("/documentation/").Handler(httpSwagger.WrapHandler)
+	// subr.PathPrefix("/documentation/").Handler(httpSwagger.WrapHandler)
+
 	subr.Handle("/home", handlers.LoggingHandler(os.Stdout, http.HandlerFunc(bc.HomePage))).Methods("GET")
+	r.Handle("/favicon.ico", http.NotFoundHandler())
+	r.PathPrefix("/").Handler(httpSwagger.WrapHandler)
 
 	handler := cors.Default().Handler(r)
 	srv := &http.Server{
