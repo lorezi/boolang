@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -9,6 +10,7 @@ import (
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	"github.com/rs/cors"
+	"github.com/subosito/gotenv"
 
 	"github.com/lorezi/boolang/controllers"
 	"github.com/lorezi/boolang/middleware"
@@ -36,6 +38,8 @@ import (
 // @BasePath /
 
 func main() {
+
+	gotenv.Load()
 
 	r := mux.NewRouter()
 	// Prometheus
@@ -100,7 +104,7 @@ func main() {
 	srv := &http.Server{
 		Handler: handler,
 		// Addr:         ":3000",
-		Addr:         ":8080",
+		Addr:         fmt.Sprintf(":%s", os.Getenv("PORT")),
 		WriteTimeout: 15 * time.Second,
 		ReadTimeout:  15 * time.Second,
 	}
